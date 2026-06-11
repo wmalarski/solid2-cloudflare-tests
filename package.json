@@ -4,19 +4,38 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vp dev",
     "build": "tsc -b && vp build",
+    "cf-typegen": "wrangler types",
+    "dev": "vp dev",
+    "knip": "knip",
+    "prepare": "vp config",
     "preview": "vp preview",
-    "prepare": "vp config"
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "solid-js": "^1.9.12"
+    "@solid-primitives/i18n": "^2.2.1",
+    "@solidjs/web": "2.0.0-beta.14",
+    "@tailwindcss/vite": "^4.3.0",
+    "decode-formdata": "^0.9.0",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
+    "solid-js": "2.0.0-beta.14",
+    "tailwind-merge": "3.6.0",
+    "tailwind-variants": "^3.2.2",
+    "tailwindcss": "^4.3.0",
+    "valibot": "^1.4.1"
   },
   "devDependencies": {
-    "@types/node": "^24.12.3",
-    "typescript": "~6.0.2",
+    "@cloudflare/vite-plugin": "^1.40.2",
+    "@types/node": "^25.9.3",
+    "daisyui": "^5.5.23",
+    "drizzle-kit": "^0.31.10",
+    "knip": "^6.16.1",
+    "typescript": "~6.0.3",
     "vite": "catalog:",
-    "vite-plugin-solid": "^2.11.12",
+    "vite-plugin-solid": "^3.0.0-next.5",
     "vite-plus": "catalog:"
   },
   "packageManager": "pnpm@11.5.3"
