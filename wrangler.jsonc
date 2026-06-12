@@ -10,7 +10,14 @@
     "run_worker_first": true,
   },
   "compatibility_flags": ["nodejs_compat"],
-  "d1_databases": [],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "albums",
+      "database_id": "df3d96ef-6606-4b4b-bc92-12e94189d16f",
+      "remote": true,
+    },
+  ],
   "vars": {
     "BETTER_AUTH_URL": "",
   },
