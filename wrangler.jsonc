@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "solid2-cloudflare-tests",
+  "name": "solid2-albums",
   "compatibility_date": "2025-04-03",
   "main": "./src/worker/index.ts",
   "assets": {
