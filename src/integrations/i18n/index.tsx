@@ -10,6 +10,9 @@ import {
 } from "solid-js";
 
 const enDict = {
+  auth: {
+    signInWithSpotify: "Sign In With Spotify",
+  },
   common: {
     cancel: "Cancel",
     clear: "Clear",

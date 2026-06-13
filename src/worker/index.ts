@@ -5,23 +5,26 @@ import { cors } from "hono/cors";
 
 const app = factory.createApp();
 
+app.use("/api/*", dbMiddleware, betterAuthMiddleware);
+
 app.use(
-  "/api/*",
+  "/api/auth/*",
   cors({
-    origin: "http://localhost:5173", // replace with your origin
+    origin: "http://127.0.0.1:5173", // replace with your origin
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["POST", "GET", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
     maxAge: 600,
     credentials: true,
   }),
-  dbMiddleware,
-  betterAuthMiddleware,
 );
 
-app.on(["POST", "GET"], "/api/auth/*", (context) => {
+app.on(["POST", "GET"], "/api/auth/*", async (context) => {
+  console.log("[context]", context.req.url);
   const auth = context.get("auth");
-  return auth.handler(context.req.raw);
+  const response = await auth.handler(context.req.raw);
+  console.log("[response]", response);
+  return response;
 });
 
 app.get("*", (context) => context.env.ASSETS.fetch(context.req.raw));
