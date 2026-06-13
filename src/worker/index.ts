@@ -27,3 +27,5 @@ app.on(["POST", "GET"], "/api/auth/*", (context) => {
 app.get("*", (context) => context.env.ASSETS.fetch(context.req.raw));
 
 export default app;
+
+export type AppType = typeof app;
