@@ -22,6 +22,7 @@
     "decode-formdata": "^0.9.0",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
+    "hono": "^4.12.25",
     "solid-js": "2.0.0-beta.14",
     "tailwind-merge": "3.6.0",
     "tailwind-variants": "^3.2.2",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.40.2",
+    "@cloudflare/workers-types": "^4.20260612.1",
     "@types/node": "^25.9.3",
     "daisyui": "^5.5.23",
     "drizzle-kit": "^0.31.10",
