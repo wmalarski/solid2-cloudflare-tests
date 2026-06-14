@@ -4,7 +4,7 @@ import { sValidator } from "@hono/standard-validator";
 import { authorizedMiddleware } from "~/integrations/better-auth/middleware";
 import { getSpotifyAlbum } from "~/integrations/spotify/fetch";
 import { schema } from "~/integrations/drizzle/schema";
-import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED, STATUS_REWATCH } from "../constansts";
+import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED } from "../constansts";
 import { and, eq } from "drizzle-orm";
 
 export const SELECT_TASKS_DEFAULT_LIMIT = 10;
@@ -15,11 +15,12 @@ const bookmarkStatusSchema = v.union([
   v.literal(STATUS_NEW),
   v.literal(STATUS_IN_PROGRESS),
   v.literal(STATUS_REVIEWED),
-  v.literal(STATUS_REWATCH),
 ]);
 
 const insertTaskSchema = v.object({
   albumId: v.string(),
+  note: v.optional(v.string()),
+  rate: v.optional(v.number()),
 });
 
 const updateTaskSchema = v.object({
@@ -36,24 +37,27 @@ const selectTasksSchema = v.object({
 export const tasksRoute = factory
   .createApp()
   .use(authorizedMiddleware)
-  .post("/", sValidator("form", insertTaskSchema), async (context) => {
+  .post("/", sValidator("json", insertTaskSchema), async (context) => {
     const session = context.get("authorizedSession");
-    const albumId = context.req.valid("form").albumId;
-    const album = await getSpotifyAlbum({ albumId, session });
-
+    const json = context.req.valid("json");
     const db = context.get("db");
+
+    const album = await getSpotifyAlbum({ albumId: json.albumId, session });
     const taskId = crypto.randomUUID();
     const artists = album.artists.map((artist) => artist.name).join(",");
+
     const response = await db.insert(schema.task).values({
       id: taskId,
       spotifyArtists: JSON.stringify(album.artists),
       spotifyId: album.id,
-      status: "ready",
+      status: json.note && json.rate !== undefined ? STATUS_REVIEWED : STATUS_IN_PROGRESS,
       title: album.name,
       userId: session.userId,
       preview: JSON.stringify(album.images),
       url: album.uri,
       text: `${artists} - ${album.release_date}`,
+      note: json.note,
+      rate: json.rate,
     });
 
     return context.json(response.results);

@@ -7,8 +7,9 @@ import { artistsRoute } from "~/modules/dashboard/routes/artists";
 import { playerRoute } from "~/modules/dashboard/routes/player";
 import { tasksRoute } from "~/modules/dashboard/routes/tasks";
 
-const app = factory
-  .createApp()
+const app = factory.createApp();
+
+const routes = app
   .use(
     "/api/*",
     cors({
@@ -35,4 +36,4 @@ const app = factory
 
 export default app;
 
-export type AppType = typeof app;
+export type AppType = typeof routes;
