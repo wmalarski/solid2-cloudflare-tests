@@ -2,7 +2,9 @@ import { dbMiddleware } from "~/integrations/drizzle/middleware";
 import { factory } from "./factory";
 import { betterAuthMiddleware } from "~/integrations/better-auth/middleware";
 import { cors } from "hono/cors";
-import { dashboardApp } from "~/modules/dashboard/router";
+import { albumsRouter } from "~/modules/dashboard/routes/albums";
+import { artistsRouter } from "~/modules/dashboard/routes/artists";
+import { playerRoute } from "~/modules/dashboard/routes/player";
 
 const app = factory
   .createApp()
@@ -24,7 +26,9 @@ const app = factory
     const response = await auth.handler(context.req.raw);
     return response;
   })
-  .route("/api/dashboard", dashboardApp)
+  .route("/api/albums", albumsRouter)
+  .route("/api/artists", artistsRouter)
+  .route("/api/player", playerRoute)
   .get("*", (context) => context.env.ASSETS.fetch(context.req.raw));
 
 export default app;
