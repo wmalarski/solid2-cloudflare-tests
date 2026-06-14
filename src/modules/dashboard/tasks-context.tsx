@@ -8,19 +8,26 @@ import {
 } from "solid-js";
 import type { TaskStatus } from "./validation";
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
+import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED } from "./constansts";
+import { parseResponse } from "hono/client";
 
 const createSelectTasksResource = (status: TaskStatus) => {
   const honoClient = useHonoClientContext();
-  const resource = createMemo(() => honoClient.api.tasks.$get({ query: { status } }));
+
   const [page, setPage] = createSignal(0);
+
+  const resource = createMemo(() =>
+    parseResponse(honoClient.api.tasks.$get({ query: { status } })),
+  );
+
   return { resource, page, setPage };
 };
 
 const createTasksContext = () => {
   return {
-    new: createSelectTasksResource("new"),
-    inProgress: createSelectTasksResource("in-progress"),
-    reviewed: createSelectTasksResource("reviewed"),
+    [STATUS_NEW]: createSelectTasksResource(STATUS_NEW),
+    [STATUS_IN_PROGRESS]: createSelectTasksResource(STATUS_IN_PROGRESS),
+    [STATUS_REVIEWED]: createSelectTasksResource(STATUS_REVIEWED),
   };
 };
 

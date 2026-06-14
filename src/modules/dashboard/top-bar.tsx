@@ -1,11 +1,12 @@
 import type { ComponentProps } from "@solidjs/web";
 import { parseResponse } from "hono/client";
-import { createMemo, type Component } from "solid-js";
+import { createMemo, refresh, type Component } from "solid-js";
 import { useAuthContext } from "~/integrations/better-auth/auth-context";
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
 import { TaskFields, taskFieldsSchema } from "./task-fields";
 import { transformFormData } from "~/ui/utils/forms";
 import * as v from "valibot";
+import { useTasksContext } from "./tasks-context";
 
 export const TopBar: Component = () => {
   const authContext = useAuthContext();
@@ -53,18 +54,26 @@ type InsertCurrentlyPlayingTaskFormProps = {
 
 const InsertCurrentlyPlayingTaskForm: Component<InsertCurrentlyPlayingTaskFormProps> = (props) => {
   const honoClient = useHonoClientContext();
+  const tasksContext = useTasksContext();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-    const result = v.safeParse(transformFormData(taskFieldsSchema), formData);
+    const result = v.safeParse(
+      transformFormData(taskFieldsSchema, { numbers: ["rate"] }),
+      formData,
+    );
 
     if (!result.success) {
       return;
     }
 
     await honoClient.api.tasks.$post({ json: { albumId: props.albumId, ...result.output } });
+
+    const tasksColumn = tasksContext[result.output.status];
+    refresh(tasksColumn.resource);
+    tasksColumn.setPage(0);
   };
 
   return (
