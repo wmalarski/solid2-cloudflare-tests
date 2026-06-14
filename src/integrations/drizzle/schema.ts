@@ -64,7 +64,7 @@ export const verification = sqliteTable("verification", {
   value: text("value").notNull(),
 });
 
-export const album = sqliteTable("album", {
+export const task = sqliteTable("task", {
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
     () => /* @__PURE__ */ new Date(),
   ),
@@ -76,7 +76,8 @@ export const album = sqliteTable("album", {
   status: text("status").notNull(),
   text: text("text"),
   title: text("title").notNull(),
-  spotifyId: text("spotify_id").unique("spotify_id_unique"),
+  spotifyId: text("spotify_id").unique("spotify_id_unique").notNull(),
+  spotifyArtists: text("spotify_artists").notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(
     () => /* @__PURE__ */ new Date(),
   ),
@@ -88,7 +89,7 @@ export const album = sqliteTable("album", {
 
 export const schema = {
   account,
-  album,
+  task,
   session,
   user,
   verification,

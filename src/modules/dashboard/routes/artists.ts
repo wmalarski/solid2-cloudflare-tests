@@ -12,7 +12,7 @@ import * as v from "valibot";
 const artistIdSchema = v.object({ artistId: v.string() });
 const artistIdsSchema = v.object({ artistIds: v.array(v.string()) });
 
-export const artistsRouter = factory
+export const artistsRoute = factory
   .createApp()
   .use(authorizedMiddleware)
   .get("/:artistId", sValidator("param", artistIdSchema), async (context) => {

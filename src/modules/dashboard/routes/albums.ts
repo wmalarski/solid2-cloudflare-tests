@@ -7,7 +7,7 @@ import * as v from "valibot";
 const albumIdSchema = v.object({ albumId: v.string() });
 const albumIdsSchema = v.object({ albumIds: v.array(v.string()) });
 
-export const albumsRouter = factory
+export const albumsRoute = factory
   .createApp()
   .use(authorizedMiddleware)
   .get("/:albumId", sValidator("param", albumIdSchema), async (context) => {
