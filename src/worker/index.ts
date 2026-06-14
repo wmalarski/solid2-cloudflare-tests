@@ -5,10 +5,8 @@ import { cors } from "hono/cors";
 
 const app = factory.createApp();
 
-app.use("/api/*", dbMiddleware, betterAuthMiddleware);
-
 app.use(
-  "/api/auth/*",
+  "/api/*",
   cors({
     origin: "http://127.0.0.1:5173", // replace with your origin
     allowHeaders: ["Content-Type", "Authorization"],
@@ -17,6 +15,8 @@ app.use(
     maxAge: 600,
     credentials: true,
   }),
+  dbMiddleware,
+  betterAuthMiddleware,
 );
 
 app.on(["POST", "GET"], "/api/auth/*", async (context) => {

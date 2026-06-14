@@ -17,6 +17,7 @@
   "dependencies": {
     "@solid-primitives/i18n": "^2.2.1",
     "@solidjs/web": "2.0.0-beta.14",
+    "@spotify/web-api-ts-sdk": "^1.2.0",
     "@tailwindcss/vite": "^4.3.0",
     "better-auth": "^1.6.16",
     "decode-formdata": "^0.9.0",
