@@ -19,10 +19,9 @@ export const initBetterAuth = ({ db, env }: InitBetterAuthArgs) => {
         clientId: env.SPOTIFY_CLIENT_ID,
         clientSecret: env.SPOTIFY_CLIENT_SECRET,
         redirectURI: "http://127.0.0.1:5173/api/auth/callback/spotify",
-        scope: ["user-read-playback-state", "user-read-email"],
+        scope: ["user-read-currently-playing", "user-read-email"],
       },
     },
-    logger: { level: "debug" },
   });
 };
 
