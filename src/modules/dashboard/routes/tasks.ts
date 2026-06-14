@@ -25,7 +25,7 @@ const updateTaskSchema = v.object({
 });
 
 const selectTasksSchema = v.object({
-  page: v.number(),
+  page: v.optional(v.number()),
   status: taskStatusSchema,
 });
 
@@ -96,7 +96,7 @@ export const tasksRoute = factory
       .from(schema.task)
       .where(and(eq(schema.task.status, query.status), eq(schema.task.userId, session.userId)))
       .limit(SELECT_TASKS_DEFAULT_LIMIT)
-      .offset(SELECT_TASKS_DEFAULT_LIMIT * query.page);
+      .offset(SELECT_TASKS_DEFAULT_LIMIT * (query.page ?? 0));
 
     return context.json(response);
   });

@@ -11,7 +11,7 @@ import { Select } from "~/ui/select/select";
 import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED } from "./constansts";
 import { taskStatusSchema } from "./validation";
 
-export const TaskFieldsSchema = v.object({
+export const taskFieldsSchema = v.object({
   note: v.string(),
   rate: v.number(),
   status: taskStatusSchema,

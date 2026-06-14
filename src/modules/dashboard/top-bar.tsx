@@ -3,7 +3,7 @@ import { parseResponse } from "hono/client";
 import { createMemo, type Component } from "solid-js";
 import { useAuthContext } from "~/integrations/better-auth/auth-context";
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
-import { TaskFields, TaskFieldsSchema } from "./task-fields";
+import { TaskFields, taskFieldsSchema } from "./task-fields";
 import { transformFormData } from "~/ui/utils/forms";
 import * as v from "valibot";
 
@@ -58,7 +58,7 @@ const InsertCurrentlyPlayingTaskForm: Component<InsertCurrentlyPlayingTaskFormPr
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-    const result = v.safeParse(transformFormData(TaskFieldsSchema), formData);
+    const result = v.safeParse(transformFormData(taskFieldsSchema), formData);
 
     if (!result.success) {
       return;
