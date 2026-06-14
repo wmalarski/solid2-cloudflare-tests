@@ -42,10 +42,6 @@ export const fetchSpotify = async <T = unknown>({
   return json as T;
 };
 
-// Utils to get type
-// export type SpotifyApiTypes = ReturnType<typeof SpotifyApi.withAccessToken>;
-// export type GetSpotifyRelatedArtistsResponse = Awaited<ReturnType<SpotifyApiTypes['player']['getCurrentlyPlayingTrack']>>
-
 type WithSession<T = {}> = T & { session: Session };
 
 type GetSpotifyAlbumArgs = WithSession<{
@@ -111,7 +107,7 @@ type GetSpotifyRelatedArtistsArgs = WithSession<{
 
 export const getSpotifyRelatedArtists = ({ artistId, session }: GetSpotifyRelatedArtistsArgs) => {
   return fetchSpotify<Artists>({
-    path: `/artists/${artistId}`,
+    path: `/artists/${artistId}/related-artists`,
     session,
   });
 };
