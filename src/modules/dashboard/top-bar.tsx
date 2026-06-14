@@ -3,6 +3,9 @@ import { parseResponse } from "hono/client";
 import { createMemo, type Component } from "solid-js";
 import { useAuthContext } from "~/integrations/better-auth/auth-context";
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
+import { TaskFields, TaskFieldsSchema } from "./task-fields";
+import { transformFormData } from "~/ui/utils/forms";
+import * as v from "valibot";
 
 export const TopBar: Component = () => {
   const authContext = useAuthContext();
@@ -54,13 +57,20 @@ const InsertCurrentlyPlayingTaskForm: Component<InsertCurrentlyPlayingTaskFormPr
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
 
-    // const formData = new FormData(event.currentTarget);
-    await honoClient.api.tasks.$post({ json: { albumId: props.albumId } });
+    const formData = new FormData(event.currentTarget);
+    const result = v.safeParse(transformFormData(TaskFieldsSchema), formData);
+
+    if (!result.success) {
+      return;
+    }
+
+    await honoClient.api.tasks.$post({ json: { albumId: props.albumId, ...result.output } });
   };
 
   return (
     <form onSubmit={onSubmit}>
       <input type="hidden" value={props.albumId} name="albumId" />
+      <TaskFields />
     </form>
   );
 };

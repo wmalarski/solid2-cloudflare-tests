@@ -4,18 +4,13 @@ import { sValidator } from "@hono/standard-validator";
 import { authorizedMiddleware } from "~/integrations/better-auth/middleware";
 import { getSpotifyAlbum } from "~/integrations/spotify/fetch";
 import { schema } from "~/integrations/drizzle/schema";
-import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED } from "../constansts";
+import { STATUS_IN_PROGRESS, STATUS_REVIEWED } from "../constansts";
 import { and, eq } from "drizzle-orm";
+import { taskStatusSchema } from "../validation";
 
 export const SELECT_TASKS_DEFAULT_LIMIT = 10;
 
 const taskIdSchema = v.object({ taskId: v.string() });
-
-const bookmarkStatusSchema = v.union([
-  v.literal(STATUS_NEW),
-  v.literal(STATUS_IN_PROGRESS),
-  v.literal(STATUS_REVIEWED),
-]);
 
 const insertTaskSchema = v.object({
   albumId: v.string(),
@@ -26,12 +21,12 @@ const insertTaskSchema = v.object({
 const updateTaskSchema = v.object({
   note: v.optional(v.string()),
   rate: v.optional(v.number()),
-  status: bookmarkStatusSchema,
+  status: taskStatusSchema,
 });
 
 const selectTasksSchema = v.object({
   page: v.number(),
-  status: bookmarkStatusSchema,
+  status: taskStatusSchema,
 });
 
 export const tasksRoute = factory

@@ -1,11 +1,9 @@
 import { createContext, useContext, type Component, type ParentProps } from "solid-js";
-import { createHonoClient } from "./create-client";
+import { createHonoClient, type HonoClient } from "./create-client";
 
 const honoClient = createHonoClient();
 
-type HonoClientContextValue = typeof honoClient;
-
-const HonoClientContext = createContext<HonoClientContextValue>(honoClient);
+const HonoClientContext = createContext<HonoClient>(honoClient);
 
 export const useHonoClientContext = () => {
   return useContext(HonoClientContext);

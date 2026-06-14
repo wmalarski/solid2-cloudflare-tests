@@ -6,6 +6,7 @@
     "lib": ["ES2023", "DOM"],
     "types": ["vite-plus/client", "./worker-configuration.d.ts"],
     "skipLibCheck": true,
+    "strict": true,
 
     /* Bundler mode */
     "moduleResolution": "bundler",

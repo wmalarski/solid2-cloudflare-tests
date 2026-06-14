@@ -13,6 +13,16 @@ const enDict = {
   auth: {
     signInWithSpotify: "Sign In With Spotify",
   },
+  task: {
+    note: "Note",
+    rate: "Rate",
+    status: "Status",
+    statuses: {
+      inProgress: "In progress",
+      new: "New",
+      reviewed: "Reviewed",
+    },
+  },
   common: {
     cancel: "Cancel",
     clear: "Clear",

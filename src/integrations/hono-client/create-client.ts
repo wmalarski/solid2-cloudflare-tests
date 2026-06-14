@@ -8,3 +8,5 @@ export const createHonoClient = () => {
     },
   });
 };
+
+export type HonoClient = ReturnType<typeof createHonoClient>;

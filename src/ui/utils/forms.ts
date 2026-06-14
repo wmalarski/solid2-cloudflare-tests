@@ -1,4 +1,5 @@
-import type * as v from "valibot";
+import * as v from "valibot";
+import { decode, type FormDataInfo } from "decode-formdata";
 
 export type FormIssues = {
   error?: string;
@@ -45,4 +46,15 @@ export const getInvalidStateProps = ({ errorMessageId, isInvalid }: GetInvalidSt
     "aria-describedby": errorMessageId,
     "aria-invalid": "true" as const,
   };
+};
+
+export const transformFormData = <T extends v.ObjectSchema<any, any>>(
+  schema: T,
+  info: FormDataInfo = {},
+) => {
+  return v.pipe(
+    v.any(),
+    v.transform((input) => decode(input, info)),
+    schema,
+  );
 };
