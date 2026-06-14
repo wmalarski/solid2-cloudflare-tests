@@ -7,6 +7,7 @@ export type AppEnv = {
   Bindings: Env;
   Variables: {
     auth: AuthInstance;
+    authorizedSession: Session;
     db: DbInstance;
     session: Session | null;
     user: User | null;

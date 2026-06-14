@@ -21,3 +21,16 @@ export const betterAuthMiddleware = factory.createMiddleware(async (context, nex
 
   return next();
 });
+
+export const authorizedMiddleware = factory.createMiddleware(async (context, next) => {
+  const session = context.get("session");
+  const user = context.get("user");
+
+  if (!session || !user) {
+    return context.text("Unauthorized", 401);
+  }
+
+  context.set("authorizedSession", session);
+
+  return next();
+});
