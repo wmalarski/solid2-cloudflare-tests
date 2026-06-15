@@ -1,13 +1,16 @@
 import type { Component } from "solid-js";
 import { TopBar } from "./top-bar";
 import { TasksBoard } from "./tasks-board";
-import { TasksContextProvider } from "./tasks-context";
+import { TasksContextProvider } from "./data-contexts/tasks-context";
+import { CurrentlyPlayingContextProvider } from "./data-contexts/currently-playing-context";
 
 export const DashboardContainer: Component = () => {
   return (
     <TasksContextProvider>
-      <TopBar />
-      <TasksBoard />
+      <CurrentlyPlayingContextProvider>
+        <TopBar />
+        <TasksBoard />
+      </CurrentlyPlayingContextProvider>
     </TasksContextProvider>
   );
 };

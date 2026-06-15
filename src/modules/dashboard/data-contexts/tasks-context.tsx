@@ -6,9 +6,9 @@ import {
   type Component,
   type ParentProps,
 } from "solid-js";
-import type { TaskStatus } from "./validation";
+import type { TaskStatus } from "../validation";
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
-import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED } from "./constansts";
+import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED } from "../constansts";
 import { parseResponse } from "hono/client";
 
 const createSelectTasksResource = (status: TaskStatus) => {

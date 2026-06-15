@@ -1,12 +1,12 @@
 import type { ComponentProps } from "@solidjs/web";
-import { parseResponse } from "hono/client";
-import { createMemo, refresh, type Component } from "solid-js";
+import { refresh, type Component } from "solid-js";
 import { useAuthContext } from "~/integrations/better-auth/auth-context";
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
 import { TaskFields, taskFieldsSchema } from "./task-fields";
 import { transformFormData } from "~/ui/utils/forms";
 import * as v from "valibot";
-import { useTasksContext } from "./tasks-context";
+import { useTasksContext } from "./data-contexts/tasks-context";
+import { useCurrentlyPlayingContext } from "./data-contexts/currently-playing-context";
 
 export const TopBar: Component = () => {
   const authContext = useAuthContext();
@@ -20,16 +20,12 @@ export const TopBar: Component = () => {
 };
 
 const CurrentlyPlayingSection: Component = () => {
-  const honoClient = useHonoClientContext();
-
-  const currentlyPlaying = createMemo(() =>
-    parseResponse(honoClient.api.player["currently-playing"].$get()),
-  );
+  const currentlyPlayingContext = useCurrentlyPlayingContext();
 
   return (
     <>
-      <pre>{JSON.stringify(currentlyPlaying, null, 2)}</pre>
-      <InsertCurrentlyPlayingTaskDialog albumId={currentlyPlaying().item.id} />
+      <pre>{JSON.stringify(currentlyPlayingContext(), null, 2)}</pre>
+      <InsertCurrentlyPlayingTaskDialog albumId={currentlyPlayingContext().item.id} />
     </>
   );
 };

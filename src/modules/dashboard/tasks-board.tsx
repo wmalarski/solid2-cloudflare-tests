@@ -1,6 +1,6 @@
 import { For, type Component } from "solid-js";
 import type { TaskStatus } from "./validation";
-import { useTasksContext } from "./tasks-context";
+import { useTasksContext } from "./data-contexts/tasks-context";
 import { BOOKMARK_STATUSES } from "./constansts";
 
 export const TasksBoard: Component = () => {
