@@ -11,6 +11,7 @@ export type AppEnv = {
     db: DbInstance;
     session: Session | null;
     user: User | null;
+    accessToken: string;
   };
 };
 

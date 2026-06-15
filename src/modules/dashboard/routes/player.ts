@@ -7,6 +7,7 @@ export const playerRoute = factory
   .use(authorizedMiddleware)
   .get("/currently-playing", async (context) => {
     const session = context.get("authorizedSession");
-    const response = await getSpotifyCurrentlyPlayingTrack({ session });
+    const accessToken = context.get("accessToken");
+    const response = await getSpotifyCurrentlyPlayingTrack({ session, accessToken });
     return context.json(response);
   });

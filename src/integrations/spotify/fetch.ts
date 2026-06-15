@@ -14,6 +14,7 @@ type FetchSpotifyArgs = {
   path: string;
   query?: Record<string, unknown>;
   init?: RequestInit;
+  accessToken?: string;
 };
 
 const SPOTIFY_BASE_URL = "https://api.spotify.com/v1";
@@ -23,18 +24,21 @@ export const fetchSpotify = async <T = unknown>({
   session,
   query,
   init,
+  accessToken,
 }: FetchSpotifyArgs): Promise<T> => {
   const searchParams = buildSearchParams(query);
 
   const url = `${SPOTIFY_BASE_URL}${path}?${searchParams}`;
 
   const headers = new Headers(init?.headers);
-  headers.set("Authorization", session.token);
+  headers.set("Authorization", `Bearer ${accessToken ?? session.token}`);
 
   const response = await fetch(url, { ...init, headers });
 
+  console.error(url, headers, session);
+  console.error(response);
+
   if (!response.ok) {
-    console.error(url);
     throw new Error(response.statusText);
   }
 
@@ -42,7 +46,7 @@ export const fetchSpotify = async <T = unknown>({
   return json as T;
 };
 
-type WithSession<T = {}> = T & { session: Session };
+type WithSession<T = {}> = T & { session: Session; accessToken?: string };
 
 type GetSpotifyAlbumArgs = WithSession<{
   albumId: string;
@@ -116,9 +120,11 @@ type GetSpotifyCurrentlyPlayingTrackArgs = WithSession;
 
 export const getSpotifyCurrentlyPlayingTrack = ({
   session,
+  accessToken,
 }: GetSpotifyCurrentlyPlayingTrackArgs) => {
   return fetchSpotify<PlaybackState>({
-    path: "/player/currently-playing",
+    path: "/me/player/currently-playing",
     session,
+    accessToken,
   });
 };
