@@ -1,13 +1,12 @@
-import { authorizedMiddleware } from "~/integrations/better-auth/middleware";
+import { accessTokenMiddleware, authorizedMiddleware } from "~/integrations/better-auth/middleware";
 import { getSpotifyCurrentlyPlayingTrack } from "~/integrations/spotify/fetch";
 import { factory } from "~/worker/factory";
 
 export const playerRoute = factory
   .createApp()
-  .use(authorizedMiddleware)
+  .use(authorizedMiddleware, accessTokenMiddleware)
   .get("/currently-playing", async (context) => {
-    const session = context.get("authorizedSession");
-    const accessToken = context.get("accessToken");
-    const response = await getSpotifyCurrentlyPlayingTrack({ session, accessToken });
+    const accessTokens = context.get("accessTokens");
+    const response = await getSpotifyCurrentlyPlayingTrack({ accessTokens });
     return context.json(response);
   });

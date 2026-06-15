@@ -16,26 +16,26 @@ export const artistsRoute = factory
   .createApp()
   .use(authorizedMiddleware)
   .get("/:artistId", sValidator("param", artistIdSchema), async (context) => {
-    const session = context.get("authorizedSession");
+    const accessTokens = context.get("accessTokens");
     const artistId = context.req.valid("param").artistId;
-    const response = await getSpotifyArtist({ artistId, session });
+    const response = await getSpotifyArtist({ artistId, accessTokens });
     return context.json(response);
   })
   .get("/", sValidator("query", artistIdsSchema), async (context) => {
-    const session = context.get("authorizedSession");
+    const accessTokens = context.get("accessTokens");
     const artistIds = context.req.valid("query").artistIds;
-    const response = await getSpotifyArtists({ artistIds, session });
+    const response = await getSpotifyArtists({ artistIds, accessTokens });
     return context.json(response);
   })
   .get("/:artistId/albums", sValidator("param", artistIdSchema), async (context) => {
-    const session = context.get("authorizedSession");
+    const accessTokens = context.get("accessTokens");
     const artistId = context.req.valid("param").artistId;
-    const response = await getSpotifyArtistAlbums({ artistId, session });
+    const response = await getSpotifyArtistAlbums({ artistId, accessTokens });
     return context.json(response);
   })
   .get("/:artistId/related", sValidator("param", artistIdSchema), async (context) => {
-    const session = context.get("authorizedSession");
+    const accessTokens = context.get("accessTokens");
     const artistId = context.req.valid("param").artistId;
-    const response = await getSpotifyRelatedArtists({ artistId, session });
+    const response = await getSpotifyRelatedArtists({ artistId, accessTokens });
     return context.json(response);
   });

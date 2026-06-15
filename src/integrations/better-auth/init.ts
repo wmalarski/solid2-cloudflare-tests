@@ -27,3 +27,5 @@ export const initBetterAuth = ({ db, env }: InitBetterAuthArgs) => {
 };
 
 export type AuthInstance = ReturnType<typeof initBetterAuth>;
+
+export type AccessTokens = Awaited<ReturnType<AuthInstance["api"]["getAccessToken"]>>;

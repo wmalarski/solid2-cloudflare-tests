@@ -1,4 +1,3 @@
-import type { Session } from "better-auth";
 import { buildSearchParams } from "~/utils/search-params";
 import {
   type Album,
@@ -8,123 +7,121 @@ import {
   type PlaybackState,
   type SimplifiedAlbum,
 } from "@spotify/web-api-ts-sdk";
+import type { AccessTokens } from "../better-auth/init";
 
 type FetchSpotifyArgs = {
-  session: Session;
+  accessTokens: AccessTokens;
+  init?: RequestInit;
   path: string;
   query?: Record<string, unknown>;
-  init?: RequestInit;
-  accessToken?: string;
 };
 
 const SPOTIFY_BASE_URL = "https://api.spotify.com/v1";
 
 export const fetchSpotify = async <T = unknown>({
-  path,
-  session,
-  query,
+  accessTokens,
   init,
-  accessToken,
+  path,
+  query,
 }: FetchSpotifyArgs): Promise<T> => {
   const searchParams = buildSearchParams(query);
 
   const url = `${SPOTIFY_BASE_URL}${path}?${searchParams}`;
 
   const headers = new Headers(init?.headers);
-  headers.set("Authorization", `Bearer ${accessToken ?? session.token}`);
+  headers.set("Authorization", `Bearer ${accessTokens.accessToken}`);
 
   const response = await fetch(url, { ...init, headers });
-
-  console.error(url, headers, session);
-  console.error(response);
 
   if (!response.ok) {
     throw new Error(response.statusText);
   }
 
   const json = await response.json();
+
   return json as T;
 };
 
-type WithSession<T = {}> = T & { session: Session; accessToken?: string };
+type WithAccessTokens<T = {}> = T & { accessTokens: AccessTokens };
 
-type GetSpotifyAlbumArgs = WithSession<{
+type GetSpotifyAlbumArgs = WithAccessTokens<{
   albumId: string;
 }>;
 
-export const getSpotifyAlbum = ({ albumId, session }: GetSpotifyAlbumArgs) => {
+export const getSpotifyAlbum = ({ albumId, accessTokens }: GetSpotifyAlbumArgs) => {
   return fetchSpotify<Album>({
     path: `/albums/${albumId}`,
-    session,
+    accessTokens,
   });
 };
 
-type GetSpotifyAlbumsArgs = WithSession<{
+type GetSpotifyAlbumsArgs = WithAccessTokens<{
   albumIds: string[];
 }>;
 
-export const getSpotifyAlbums = ({ albumIds, session }: GetSpotifyAlbumsArgs) => {
+export const getSpotifyAlbums = ({ albumIds, accessTokens }: GetSpotifyAlbumsArgs) => {
   return fetchSpotify<Album[]>({
     path: "/albums",
     query: { ids: albumIds.join(",") },
-    session,
+    accessTokens,
   });
 };
 
-type GetSpotifyArtistArgs = WithSession<{
+type GetSpotifyArtistArgs = WithAccessTokens<{
   artistId: string;
 }>;
 
-export const getSpotifyArtist = ({ artistId, session }: GetSpotifyArtistArgs) => {
+export const getSpotifyArtist = ({ artistId, accessTokens }: GetSpotifyArtistArgs) => {
   return fetchSpotify<Artist>({
     path: `/artists/${artistId}`,
-    session,
+    accessTokens,
   });
 };
 
-type GetSpotifyArtistsArgs = WithSession<{
+type GetSpotifyArtistsArgs = WithAccessTokens<{
   artistIds: string[];
 }>;
 
-export const getSpotifyArtists = ({ artistIds, session }: GetSpotifyArtistsArgs) => {
+export const getSpotifyArtists = ({ artistIds, accessTokens }: GetSpotifyArtistsArgs) => {
   return fetchSpotify<Artist[]>({
     path: "/artists",
     query: { ids: artistIds.join(",") },
-    session,
+    accessTokens,
   });
 };
 
-type GetSpotifyArtistAlbumsArgs = WithSession<{
+type GetSpotifyArtistAlbumsArgs = WithAccessTokens<{
   artistId: string;
 }>;
 
-export const getSpotifyArtistAlbums = ({ artistId, session }: GetSpotifyArtistAlbumsArgs) => {
+export const getSpotifyArtistAlbums = ({ artistId, accessTokens }: GetSpotifyArtistAlbumsArgs) => {
   return fetchSpotify<Page<SimplifiedAlbum>>({
     path: `/artists/${artistId}/albums`,
-    session,
+    accessTokens,
   });
 };
 
-type GetSpotifyRelatedArtistsArgs = WithSession<{
+type GetSpotifyRelatedArtistsArgs = WithAccessTokens<{
   artistId: string;
 }>;
 
-export const getSpotifyRelatedArtists = ({ artistId, session }: GetSpotifyRelatedArtistsArgs) => {
+export const getSpotifyRelatedArtists = ({
+  artistId,
+  accessTokens,
+}: GetSpotifyRelatedArtistsArgs) => {
   return fetchSpotify<Artists>({
     path: `/artists/${artistId}/related-artists`,
-    session,
+    accessTokens,
   });
 };
 
-type GetSpotifyCurrentlyPlayingTrackArgs = WithSession;
+type GetSpotifyCurrentlyPlayingTrackArgs = WithAccessTokens;
 
 export const getSpotifyCurrentlyPlayingTrack = ({
-  session,
-  accessToken,
+  accessTokens,
 }: GetSpotifyCurrentlyPlayingTrackArgs) => {
   return fetchSpotify<PlaybackState>({
     path: "/me/player/currently-playing",
-    session,
-    accessToken,
+    accessTokens,
   });
 };

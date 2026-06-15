@@ -11,14 +11,14 @@ export const albumsRoute = factory
   .createApp()
   .use(authorizedMiddleware)
   .get("/", sValidator("query", albumIdsSchema), async (context) => {
-    const session = context.get("authorizedSession");
+    const accessTokens = context.get("accessTokens");
     const albumIds = context.req.valid("query").albumIds;
-    const response = await getSpotifyAlbums({ albumIds, session });
+    const response = await getSpotifyAlbums({ albumIds, accessTokens });
     return context.json(response);
   })
   .get("/:albumId", sValidator("param", albumIdSchema), async (context) => {
-    const session = context.get("authorizedSession");
+    const accessTokens = context.get("accessTokens");
     const albumId = context.req.valid("param").albumId;
-    const response = await getSpotifyAlbum({ albumId, session });
+    const response = await getSpotifyAlbum({ albumId, accessTokens });
     return context.json(response);
   });

@@ -1,7 +1,7 @@
 import { factory } from "~/worker/factory";
 import * as v from "valibot";
 import { sValidator } from "@hono/standard-validator";
-import { authorizedMiddleware } from "~/integrations/better-auth/middleware";
+import { accessTokenMiddleware, authorizedMiddleware } from "~/integrations/better-auth/middleware";
 import { getSpotifyAlbum } from "~/integrations/spotify/fetch";
 import { schema } from "~/integrations/drizzle/schema";
 import { STATUS_IN_PROGRESS, STATUS_REVIEWED } from "../constansts";
@@ -31,13 +31,14 @@ const selectTasksSchema = v.object({
 
 export const tasksRoute = factory
   .createApp()
-  .use(authorizedMiddleware)
+  .use(authorizedMiddleware, accessTokenMiddleware)
   .post("/", sValidator("json", insertTaskSchema), async (context) => {
     const session = context.get("authorizedSession");
+    const accessTokens = context.get("accessTokens");
     const json = context.req.valid("json");
     const db = context.get("db");
 
-    const album = await getSpotifyAlbum({ albumId: json.albumId, session });
+    const album = await getSpotifyAlbum({ albumId: json.albumId, accessTokens });
     const taskId = crypto.randomUUID();
     const artists = album.artists.map((artist) => artist.name).join(",");
 
