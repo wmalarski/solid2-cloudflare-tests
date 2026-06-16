@@ -1,8 +1,23 @@
-import { For, type Component } from "solid-js";
+import {
+  action,
+  createMemo,
+  createOptimistic,
+  createUniqueId,
+  For,
+  isPending,
+  refresh,
+  type Component,
+} from "solid-js";
 import type { TaskStatus } from "./validation";
 import { useTasksContext, type TaskResourceItem } from "./data-contexts/tasks-context";
 import { BOOKMARK_STATUSES } from "./constansts";
-import { Card, CardBody, CardDescription, CardTitle } from "~/ui/card/card";
+import { Card, CardActions, CardBody, CardDescription, CardTitle } from "~/ui/card/card";
+import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
+import { useI18n } from "~/integrations/i18n";
+import { closeDialog, DialogTrigger } from "~/ui/dialog/dialog";
+import { TrashIcon } from "~/ui/icons/trash-icon";
+import { parseResponse } from "hono/client";
+import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
 
 export const TasksBoard: Component = () => {
   return (
@@ -57,8 +72,66 @@ const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
           <CardTitle component="span">{props.task.title}</CardTitle>
           <CardDescription>{props.task.text}</CardDescription>
           <pre>{JSON.stringify(props.task, null, 2)}</pre>
+          <CardActions>
+            <DeleteTaskDialog task={props.task} />
+          </CardActions>
         </CardBody>
       </Card>
     </li>
+  );
+};
+
+type DeleteTaskDialogProps = {
+  task: TaskResourceItem;
+};
+
+const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
+  const { t } = useI18n();
+
+  const dialogId = createUniqueId();
+
+  const honoClient = useHonoClientContext();
+  const tasksContext = useTasksContext();
+
+  const [isSubmitting, setIsSubmitting] = createOptimistic(false);
+
+  const resource = createMemo(() => {
+    return tasksContext[props.task.status as TaskStatus].resource;
+  });
+
+  const isLoading = createMemo(() => isSubmitting() || isPending(resource()));
+
+  const onSave = action(async function* () {
+    setIsSubmitting(true);
+
+    const result = await parseResponse(
+      honoClient.api.tasks[":taskId"].$delete({
+        param: { taskId: props.task.id },
+      }),
+    );
+
+    yield result;
+
+    setIsSubmitting(false);
+    closeDialog(dialogId);
+    refresh(resource());
+  });
+
+  return (
+    <>
+      <DialogTrigger color="warning" for={dialogId} isLoading={isLoading()}>
+        <TrashIcon class="size-4" />
+        {t("common.delete")}
+      </DialogTrigger>
+      <AlertDialog
+        dialogId={dialogId}
+        description={t("task.delete.description")}
+        title={t("task.delete.title")}
+        onSave={onSave}
+        isLoading={isLoading()}
+        submitColor="warning"
+        submitLabel={t("common.delete")}
+      />
+    </>
   );
 };

@@ -22,6 +22,10 @@ const enDict = {
       new: "New",
       reviewed: "Reviewed",
     },
+    delete: {
+      title: "Delete task",
+      description: "Delete selected task from the list",
+    },
   },
   currentlyPlaying: {
     addTask: {

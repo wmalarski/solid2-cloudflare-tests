@@ -1,6 +1,6 @@
 import type { Component } from "solid-js";
 import { useI18n } from "~/integrations/i18n";
-import { Button } from "../button/button";
+import { Button, type ButtonProps } from "../button/button";
 import {
   Dialog,
   DialogActions,
@@ -20,6 +20,8 @@ type AlertDialogProps = {
   open?: boolean;
   title: string;
   isLoading?: boolean;
+  submitColor?: ButtonProps["color"];
+  submitLabel?: string;
 };
 
 export const AlertDialog: Component<AlertDialogProps> = (props) => {
@@ -33,13 +35,13 @@ export const AlertDialog: Component<AlertDialogProps> = (props) => {
         <DialogActions>
           <DialogClose />
           <Button
-            color="primary"
+            color={props.submitColor ?? "primary"}
             form={props.formId}
             onClick={props.onSave}
             type={props.onSave ? "button" : "submit"}
             isLoading={props.isLoading}
           >
-            {t("common.save")}
+            {props.submitLabel ?? t("common.save")}
           </Button>
         </DialogActions>
       </DialogBox>
