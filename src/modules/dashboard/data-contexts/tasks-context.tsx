@@ -33,6 +33,10 @@ const createTasksContext = () => {
 
 type TasksContextValue = ReturnType<typeof createTasksContext>;
 
+export type TaskResourceItem = ReturnType<
+  ReturnType<typeof createSelectTasksResource>["resource"]
+>[0];
+
 const TasksContext = createContext<TasksContextValue | null>(null);
 
 export const useTasksContext = () => {
