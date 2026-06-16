@@ -2,7 +2,12 @@ import { type ComponentProps, Dynamic, type DynamicProps, type ValidComponent } 
 import { type Component, omit } from "solid-js";
 import { cn } from "tailwind-variants";
 import type { ComponentVariantProps } from "../utils/types";
-import { cardActionsRecipe, cardRecipe, cardTitleRecipe } from "./card.recipe";
+import {
+  cardActionsRecipe,
+  cardDescriptionRecipe,
+  cardRecipe,
+  cardTitleRecipe,
+} from "./card.recipe";
 
 export type CardProps = ComponentVariantProps<"div", typeof cardRecipe>;
 
@@ -33,6 +38,12 @@ export const CardTitle = <T extends ValidComponent>(props: CardTitleProps<T>) =>
       component={props.component}
     />
   );
+};
+
+export type CardDescriptionProps = ComponentVariantProps<"span", typeof cardDescriptionRecipe>;
+
+export const CardDescription: Component<CardDescriptionProps> = (props) => {
+  return <span {...props} class={cardDescriptionRecipe({ class: props.class })} />;
 };
 
 export type CardBodyProps = ComponentProps<"div">;

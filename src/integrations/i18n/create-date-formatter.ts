@@ -12,5 +12,6 @@ export const createDateFormatter = () => {
         timeStyle: "medium",
       }),
   );
+
   return (date: string | Date) => formatter().format(new Date(date));
 };

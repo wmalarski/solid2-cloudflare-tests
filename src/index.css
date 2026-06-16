@@ -3,5 +3,5 @@
 @plugin "daisyui" {
   themes:
     corporate --default,
-    business --prefersdark;
+    forest --prefersdark;
 }

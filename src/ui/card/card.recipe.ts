@@ -26,6 +26,8 @@ export const cardRecipe = tv({
 
 export const cardTitleRecipe = tv({ base: "card-title" });
 
+export const cardDescriptionRecipe = tv({ base: "text-sm opacity-50" });
+
 export const cardBodyRecipe = tv({ base: "card-body" });
 
 export const cardActionsRecipe = tv({

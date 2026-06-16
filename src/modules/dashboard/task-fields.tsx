@@ -13,7 +13,10 @@ import { taskStatusSchema } from "./validation";
 
 export const taskFieldsSchema = v.object({
   note: v.string(),
-  rate: v.number(),
+  rate: v.pipe(
+    v.nullable(v.number()),
+    v.transform((value) => value ?? undefined),
+  ),
   status: taskStatusSchema,
 });
 
@@ -35,7 +38,6 @@ export const TaskFields: Component<TaskFieldsProps> = (props) => {
         disabled={props.pending}
         id="note"
         name="note"
-        required={true}
         width="full"
         value={props.initialValues?.note ?? ""}
         {...getInvalidStateProps({
@@ -50,7 +52,10 @@ export const TaskFields: Component<TaskFieldsProps> = (props) => {
         disabled={props.pending}
         id="rate"
         name="rate"
-        required={true}
+        type="number"
+        min="0"
+        max="10"
+        step="0.1"
         width="full"
         value={props.initialValues?.rate ?? ""}
         {...getInvalidStateProps({

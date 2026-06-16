@@ -11,18 +11,18 @@ export const App = () => {
   const session = createMemo(() => authClient.getSession());
 
   return (
-    <HonoClientContextProvider>
-      <Errored fallback={ErrorFallback}>
-        <Loading>
-          <I18nContextProvider>
+    <I18nContextProvider>
+      <HonoClientContextProvider>
+        <Errored fallback={ErrorFallback}>
+          <Loading>
             <AuthContextProvider value={session}>
               <Show when={session().data} fallback={<SignInForm />}>
                 <DashboardContainer />
               </Show>
             </AuthContextProvider>
-          </I18nContextProvider>
-        </Loading>
-      </Errored>
-    </HonoClientContextProvider>
+          </Loading>
+        </Errored>
+      </HonoClientContextProvider>
+    </I18nContextProvider>
   );
 };
