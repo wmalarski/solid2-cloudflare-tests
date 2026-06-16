@@ -18,6 +18,9 @@ import { closeDialog, DialogTrigger } from "~/ui/dialog/dialog";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { parseResponse } from "hono/client";
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
+import { AlbumImage } from "./album-image";
+import { parseImages, parseSimplifiedArtist } from "./parsers";
+import { createArtistsNamesFormatter } from "~/integrations/spotify/formatters";
 
 export const TasksBoard: Component = () => {
   return (
@@ -65,11 +68,17 @@ type TaskColumnItemProps = {
 };
 
 const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
+  const artistsNamesFormatter = createArtistsNamesFormatter();
+
   return (
     <li>
       <Card>
+        <AlbumImage images={parseImages(props.task.preview ?? "")} size={300} />
         <CardBody>
           <CardTitle component="span">{props.task.title}</CardTitle>
+          <CardDescription>
+            {artistsNamesFormatter(parseSimplifiedArtist(props.task.spotifyArtists))}
+          </CardDescription>
           <CardDescription>{props.task.text}</CardDescription>
           <pre>{JSON.stringify(props.task, null, 2)}</pre>
           <CardActions>

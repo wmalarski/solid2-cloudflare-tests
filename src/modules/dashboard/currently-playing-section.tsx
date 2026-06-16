@@ -31,6 +31,7 @@ import { Card, CardActions, CardBody, CardDescription, CardTitle } from "~/ui/ca
 import { createArtistsNamesFormatter } from "~/integrations/spotify/formatters";
 import { createDateFormatter } from "~/integrations/i18n/create-date-formatter";
 import { parseResponse } from "hono/client";
+import { AlbumImage } from "./album-image";
 
 export const CurrentlyPlayingSection: Component = () => {
   const currentlyPlayingContext = useCurrentlyPlayingContext();
@@ -47,6 +48,7 @@ export const CurrentlyPlayingSection: Component = () => {
     <Show when={album()}>
       {(album) => (
         <Card>
+          <AlbumImage images={album().images} size={64} />
           <CardBody>
             <CardTitle component="span">{album().name}</CardTitle>
             <CardDescription>{artistsNamesFormatter(album().artists)}</CardDescription>

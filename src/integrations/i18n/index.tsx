@@ -17,6 +17,7 @@ const enDict = {
     note: "Note",
     rate: "Rate",
     status: "Status",
+    image: "Album image",
     statuses: {
       inProgress: "In progress",
       new: "New",
