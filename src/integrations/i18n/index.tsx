@@ -23,6 +23,13 @@ const enDict = {
       reviewed: "Reviewed",
     },
   },
+  currentlyPlaying: {
+    addTask: {
+      trigger: "Save",
+      title: "Save album",
+      description: "Save currently playing album as task",
+    },
+  },
   common: {
     cancel: "Cancel",
     clear: "Clear",
