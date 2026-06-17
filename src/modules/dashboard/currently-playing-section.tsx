@@ -41,7 +41,9 @@ export const CurrentlyPlayingSection: Component = () => {
 
   const album = createMemo(() => {
     const currentlyPlaying = currentlyPlayingContext();
-    return "album" in currentlyPlaying.item ? currentlyPlaying.item.album : null;
+    return currentlyPlaying && "album" in currentlyPlaying.item
+      ? currentlyPlaying.item.album
+      : null;
   });
 
   return (

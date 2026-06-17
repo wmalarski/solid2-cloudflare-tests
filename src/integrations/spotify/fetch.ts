@@ -23,7 +23,7 @@ export const fetchSpotify = async <T = unknown>({
   init,
   path,
   query,
-}: FetchSpotifyArgs): Promise<T> => {
+}: FetchSpotifyArgs): Promise<T | null> => {
   const searchParams = buildSearchParams(query);
 
   const url = `${SPOTIFY_BASE_URL}${path}?${searchParams}`;
@@ -37,9 +37,17 @@ export const fetchSpotify = async <T = unknown>({
     throw new Error(response.statusText);
   }
 
-  const json = await response.json();
+  if (response.status === 204) {
+    return null;
+  }
 
-  return json as T;
+  try {
+    const json = await response.json();
+    return json as T;
+  } catch (error) {
+    console.log("[error]", error, response);
+    throw new Error(response.statusText);
+  }
 };
 
 type WithAccessTokens<T = {}> = T & { accessTokens: AccessTokens };

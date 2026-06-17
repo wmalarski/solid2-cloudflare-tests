@@ -44,7 +44,7 @@ import { useStatusTranslations } from "./use-status-translations";
 
 export const TasksBoard: Component = () => {
   return (
-    <div class="grid grid-cols-3">
+    <div class="grid grid-cols-3 p-4">
       <For each={BOOKMARK_STATUSES}>{(status) => <TasksColumn status={status} />}</For>
     </div>
   );
@@ -89,7 +89,7 @@ const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
   const dateFormatter = createDateFormatter();
 
   return (
-    <li>
+    <li class="w-75">
       <Card>
         <AlbumImage images={parseImages(props.task.preview ?? "")} size={300} />
         <CardBody>
@@ -97,7 +97,7 @@ const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
           <CardDescription>
             {artistsNamesFormatter(parseSimplifiedArtist(props.task.spotifyArtists))}
           </CardDescription>
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-2 gap-2 pb-4">
             <TaskInfoPair
               name={t("task.releaseDate")}
               value={props.task.releaseDate ? dateFormatter(props.task.releaseDate) : undefined}
@@ -109,7 +109,6 @@ const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
             />
             <TaskInfoPair name={t("task.doneAt")} value={props.task.doneAt ?? undefined} />
           </div>
-          <pre>{JSON.stringify(props.task, null, 2)}</pre>
           <CardActions>
             <UpdateTaskDialog task={props.task} />
             <DeleteTaskDialog task={props.task} />

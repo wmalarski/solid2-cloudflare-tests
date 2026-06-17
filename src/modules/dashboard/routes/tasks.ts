@@ -39,6 +39,11 @@ export const tasksRoute = factory
     const db = context.get("db");
 
     const album = await getSpotifyAlbum({ albumId: json.albumId, accessTokens });
+
+    if (!album) {
+      return context.status(400);
+    }
+
     const taskId = crypto.randomUUID();
 
     const response = await db.insert(schema.task).values({
