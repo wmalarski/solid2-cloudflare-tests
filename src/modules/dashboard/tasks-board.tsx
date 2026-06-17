@@ -7,6 +7,7 @@ import {
   For,
   isPending,
   refresh,
+  Show,
   type Component,
 } from "solid-js";
 import type { TaskStatus } from "./validation";
@@ -38,12 +39,14 @@ import { parseFormValidationError, transformFormData, type FormIssues } from "~/
 import type { ComponentProps } from "@solidjs/web";
 import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { Button } from "~/ui/button/button";
+import { createDateFormatter } from "~/integrations/i18n/create-date-formatter";
+import { useStatusTranslations } from "./use-status-translations";
 
 export const TasksBoard: Component = () => {
   return (
-    <>
+    <div class="grid grid-cols-3">
       <For each={BOOKMARK_STATUSES}>{(status) => <TasksColumn status={status} />}</For>
-    </>
+    </div>
   );
 };
 
@@ -54,21 +57,16 @@ type TasksColumnProps = {
 const TasksColumn: Component<TasksColumnProps> = (props) => {
   const tasksContext = useTasksContext();
 
+  const statusTranslations = useStatusTranslations();
+
   return (
-    <>
-      <pre>
-        {JSON.stringify(
-          {
-            page: tasksContext[props.status].page,
-          },
-          null,
-          2,
-        )}
-      </pre>
-      <ul>
+    <div class="flex flex-col gap-4">
+      <h2>{statusTranslations(props.status)}</h2>
+      <pre>{JSON.stringify({ page: tasksContext[props.status].page }, null, 2)}</pre>
+      <ul class="flex flex-col gap-4">
         <TaskColumnFragment tasks={tasksContext[props.status].resource()} />
       </ul>
-    </>
+    </div>
   );
 };
 
@@ -86,6 +84,7 @@ type TaskColumnItemProps = {
 
 const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
   const artistsNamesFormatter = createArtistsNamesFormatter();
+  const dateFormatter = createDateFormatter();
 
   return (
     <li>
@@ -96,7 +95,9 @@ const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
           <CardDescription>
             {artistsNamesFormatter(parseSimplifiedArtist(props.task.spotifyArtists))}
           </CardDescription>
-          <CardDescription>{props.task.text}</CardDescription>
+          <Show when={props.task.releaseDate}>
+            {(releaseDate) => <CardDescription>{dateFormatter(releaseDate())}</CardDescription>}
+          </Show>
           <pre>{JSON.stringify(props.task, null, 2)}</pre>
           <CardActions>
             <UpdateTaskDialog task={props.task} />

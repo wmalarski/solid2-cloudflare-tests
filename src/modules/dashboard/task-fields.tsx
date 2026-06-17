@@ -1,4 +1,4 @@
-import { type Component } from "solid-js";
+import { For, type Component } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
 import { FieldError } from "~/ui/field-error/field-error";
@@ -8,8 +8,9 @@ import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
 import type { SelectTodosItem } from "./routes/types";
 import { Select } from "~/ui/select/select";
-import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED } from "./constansts";
+import { BOOKMARK_STATUSES, STATUS_IN_PROGRESS } from "./constansts";
 import { taskStatusSchema } from "./validation";
+import { useStatusTranslations } from "./use-status-translations";
 
 export const taskFieldsSchema = v.object({
   note: v.string(),
@@ -28,6 +29,8 @@ type TaskFieldsProps = {
 
 export const TaskFields: Component<TaskFieldsProps> = (props) => {
   const { t } = useI18n();
+
+  const statusTranslations = useStatusTranslations();
 
   return (
     <Fieldset>
@@ -78,9 +81,9 @@ export const TaskFields: Component<TaskFieldsProps> = (props) => {
           isInvalid: Boolean(props.issues?.errors?.status),
         })}
       >
-        <option value={STATUS_NEW}>{t("task.statuses.new")}</option>
-        <option value={STATUS_IN_PROGRESS}>{t("task.statuses.inProgress")}</option>
-        <option value={STATUS_REVIEWED}>{t("task.statuses.reviewed")}</option>
+        <For each={BOOKMARK_STATUSES}>
+          {(status) => <option value={status}>{statusTranslations(status)}</option>}
+        </For>
       </Select>
       <FieldError id="status-error" message={props.issues?.errors?.status} />
     </Fieldset>

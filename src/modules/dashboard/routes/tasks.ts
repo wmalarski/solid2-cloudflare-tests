@@ -40,7 +40,6 @@ export const tasksRoute = factory
 
     const album = await getSpotifyAlbum({ albumId: json.albumId, accessTokens });
     const taskId = crypto.randomUUID();
-    const artists = album.artists.map((artist) => artist.name).join(",");
 
     const response = await db.insert(schema.task).values({
       id: taskId,
@@ -50,8 +49,8 @@ export const tasksRoute = factory
       title: album.name,
       userId: session.userId,
       preview: JSON.stringify(album.images),
-      url: album.uri,
-      text: `${artists} - ${album.release_date}`,
+      url: album.external_urls.spotify,
+      releaseDate: new Date(album.release_date),
       note: json.note,
       rate: json.rate,
     });

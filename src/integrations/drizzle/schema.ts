@@ -74,7 +74,7 @@ export const task = sqliteTable("task", {
   preview: text("preview"),
   rate: real("rate"),
   status: text("status").notNull(),
-  text: text("text"),
+  releaseDate: integer("release_date", { mode: "timestamp" }),
   title: text("title").notNull(),
   spotifyId: text("spotify_id").unique("spotify_id_unique").notNull(),
   spotifyArtists: text("spotify_artists").notNull(),
