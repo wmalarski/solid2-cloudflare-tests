@@ -2,6 +2,7 @@ import {
   action,
   createMemo,
   createOptimistic,
+  createSignal,
   createUniqueId,
   For,
   isPending,
@@ -14,13 +15,29 @@ import { BOOKMARK_STATUSES } from "./constansts";
 import { Card, CardActions, CardBody, CardDescription, CardTitle } from "~/ui/card/card";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { useI18n } from "~/integrations/i18n";
-import { closeDialog, DialogTrigger } from "~/ui/dialog/dialog";
+import {
+  closeDialog,
+  Dialog,
+  DialogActions,
+  DialogBackdrop,
+  DialogBox,
+  DialogClose,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from "~/ui/dialog/dialog";
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { parseResponse } from "hono/client";
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
 import { AlbumImage } from "./album-image";
 import { parseImages, parseSimplifiedArtist } from "./parsers";
 import { createArtistsNamesFormatter } from "~/integrations/spotify/formatters";
+import * as v from "valibot";
+import { TaskFields, taskFieldsSchema } from "./task-fields";
+import { parseFormValidationError, transformFormData, type FormIssues } from "~/ui/utils/forms";
+import type { ComponentProps } from "@solidjs/web";
+import { PencilIcon } from "~/ui/icons/pencil-icon";
+import { Button } from "~/ui/button/button";
 
 export const TasksBoard: Component = () => {
   return (
@@ -82,6 +99,7 @@ const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
           <CardDescription>{props.task.text}</CardDescription>
           <pre>{JSON.stringify(props.task, null, 2)}</pre>
           <CardActions>
+            <UpdateTaskDialog task={props.task} />
             <DeleteTaskDialog task={props.task} />
           </CardActions>
         </CardBody>
@@ -110,16 +128,14 @@ const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
 
   const isLoading = createMemo(() => isSubmitting() || isPending(resource()));
 
-  const onSave = action(async function* () {
+  const onSave = action(function* () {
     setIsSubmitting(true);
 
-    const result = await parseResponse(
+    yield parseResponse(
       honoClient.api.tasks[":taskId"].$delete({
         param: { taskId: props.task.id },
       }),
     );
-
-    yield result;
 
     setIsSubmitting(false);
     closeDialog(dialogId);
@@ -142,5 +158,94 @@ const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
         submitLabel={t("common.delete")}
       />
     </>
+  );
+};
+
+type UpdateTaskDialogProps = {
+  task: TaskResourceItem;
+};
+
+const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
+  const { t } = useI18n();
+
+  const formId = createUniqueId();
+  const dialogId = createUniqueId();
+
+  const onSuccess = () => {
+    closeDialog(dialogId);
+  };
+
+  return (
+    <>
+      <DialogTrigger color="primary" for={dialogId}>
+        <PencilIcon class="size-4" />
+        {t("common.update")}
+      </DialogTrigger>
+      <Dialog id={dialogId}>
+        <DialogBox>
+          <DialogTitle>{t("task.update.title")}</DialogTitle>
+          <DialogDescription>{t("task.update.description")}</DialogDescription>
+          <UpdateTaskForm onSuccess={onSuccess} task={props.task} formId={formId} />
+          <DialogActions>
+            <DialogClose />
+            <Button color="primary" form={formId} type="submit">
+              {t("common.update")}
+            </Button>
+          </DialogActions>
+        </DialogBox>
+        <DialogBackdrop />
+      </Dialog>
+    </>
+  );
+};
+
+type UpdateTaskFormProps = {
+  formId: string;
+  task: TaskResourceItem;
+  onSuccess: () => void;
+};
+
+const UpdateTaskForm: Component<UpdateTaskFormProps> = (props) => {
+  const honoClient = useHonoClientContext();
+  const tasksContext = useTasksContext();
+
+  const [issues, setIssues] = createSignal<FormIssues>();
+  const [isSubmitting, setIsSubmitting] = createOptimistic(false);
+
+  const onSubmit: ComponentProps<"form">["onSubmit"] = action(function* (event) {
+    event.preventDefault();
+
+    setIsSubmitting(true);
+
+    const formData = new FormData(event.currentTarget);
+    const parsed = v.safeParse(
+      transformFormData(taskFieldsSchema, { numbers: ["rate"] }),
+      formData,
+    );
+
+    if (!parsed.success) {
+      setIssues(parseFormValidationError(parsed.issues));
+      return;
+    }
+
+    yield parseResponse(
+      honoClient.api.tasks[":taskId"].$put({
+        param: { taskId: props.task.id },
+        json: parsed.output,
+      }),
+    );
+
+    setIsSubmitting(false);
+    props.onSuccess();
+
+    const tasksColumn = tasksContext[parsed.output.status];
+    refresh(tasksColumn.resource);
+    tasksColumn.setPage(0);
+  });
+
+  return (
+    <form onSubmit={onSubmit} id={props.formId}>
+      <TaskFields initialValues={props.task} pending={isSubmitting()} issues={issues()} />
+    </form>
   );
 };

@@ -27,6 +27,10 @@ const enDict = {
       title: "Delete task",
       description: "Delete selected task from the list",
     },
+    update: {
+      title: "Update task",
+      description: "Update selected task",
+    },
   },
   currentlyPlaying: {
     addTask: {

@@ -61,16 +61,16 @@ export const tasksRoute = factory
   .put(
     "/:taskId",
     sValidator("param", taskIdSchema),
-    sValidator("form", updateTaskSchema),
+    sValidator("json", updateTaskSchema),
     async (context) => {
       const session = context.get("authorizedSession");
       const taskId = context.req.valid("param").taskId;
-      const form = context.req.valid("form");
+      const json = context.req.valid("json");
       const db = context.get("db");
 
       const response = await db
         .update(schema.task)
-        .set(form)
+        .set(json)
         .where(and(eq(schema.task.id, taskId), eq(schema.task.userId, session.userId)));
 
       return context.json(response.results);
