@@ -83,6 +83,8 @@ type TaskColumnItemProps = {
 };
 
 const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
+  const { t } = useI18n();
+
   const artistsNamesFormatter = createArtistsNamesFormatter();
   const dateFormatter = createDateFormatter();
 
@@ -95,9 +97,18 @@ const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
           <CardDescription>
             {artistsNamesFormatter(parseSimplifiedArtist(props.task.spotifyArtists))}
           </CardDescription>
-          <Show when={props.task.releaseDate}>
-            {(releaseDate) => <CardDescription>{dateFormatter(releaseDate())}</CardDescription>}
-          </Show>
+          <div class="grid grid-cols-2 gap-2">
+            <TaskInfoPair
+              name={t("task.releaseDate")}
+              value={props.task.releaseDate ? dateFormatter(props.task.releaseDate) : undefined}
+            />
+            <TaskInfoPair name={t("task.note")} value={props.task.note ?? undefined} />
+            <TaskInfoPair
+              name={t("task.rate")}
+              value={props.task.rate !== null ? String(props.task.rate) : undefined}
+            />
+            <TaskInfoPair name={t("task.doneAt")} value={props.task.doneAt ?? undefined} />
+          </div>
           <pre>{JSON.stringify(props.task, null, 2)}</pre>
           <CardActions>
             <UpdateTaskDialog task={props.task} />
@@ -106,6 +117,20 @@ const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
         </CardBody>
       </Card>
     </li>
+  );
+};
+
+type TaskInfoPairProps = {
+  name: string;
+  value?: string;
+};
+
+const TaskInfoPair: Component<TaskInfoPairProps> = (props) => {
+  return (
+    <Show when={props.value && props.value.length > 0}>
+      <span>{props.name}</span>
+      <span>{props.value}</span>
+    </Show>
   );
 };
 
