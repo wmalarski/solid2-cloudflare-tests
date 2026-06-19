@@ -15,6 +15,7 @@ import * as v from "valibot";
 import { useTasksContext } from "./data-contexts/tasks-context";
 import { useCurrentlyPlayingContext } from "./data-contexts/currently-playing-context";
 import {
+  closeDialog,
   Dialog,
   DialogActions,
   DialogBackdrop,
@@ -32,6 +33,7 @@ import { createArtistsNamesFormatter } from "~/integrations/spotify/formatters";
 import { createDateFormatter } from "~/integrations/i18n/create-date-formatter";
 import { parseResponse } from "hono/client";
 import { AlbumImage } from "./album-image";
+import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
 
 export const CurrentlyPlayingSection: Component = () => {
   const currentlyPlayingContext = useCurrentlyPlayingContext();
@@ -57,7 +59,7 @@ export const CurrentlyPlayingSection: Component = () => {
             <CardDescription>{dateFormatter(album().release_date)}</CardDescription>
             <pre>{JSON.stringify(album(), null, 2)}</pre>
             <CardActions>
-              <InsertCurrentlyPlayingTaskDialog albumId={album().id} />
+              <InsertCurrentlyPlayingTaskDialog album={album()} />
             </CardActions>
           </CardBody>
         </Card>
@@ -67,7 +69,7 @@ export const CurrentlyPlayingSection: Component = () => {
 };
 
 type InsertCurrentlyPlayingTaskDialogProps = {
-  albumId: string;
+  album: SimplifiedAlbum;
 };
 
 const InsertCurrentlyPlayingTaskDialog: Component<InsertCurrentlyPlayingTaskDialogProps> = (
@@ -77,6 +79,10 @@ const InsertCurrentlyPlayingTaskDialog: Component<InsertCurrentlyPlayingTaskDial
 
   const formId = createUniqueId();
   const dialogId = createUniqueId();
+
+  const onSubmitStart = () => {
+    closeDialog(dialogId);
+  };
 
   return (
     <>
@@ -88,7 +94,11 @@ const InsertCurrentlyPlayingTaskDialog: Component<InsertCurrentlyPlayingTaskDial
         <DialogBox>
           <DialogTitle>{t("currentlyPlaying.addTask.title")}</DialogTitle>
           <DialogDescription>{t("currentlyPlaying.addTask.description")}</DialogDescription>
-          <InsertCurrentlyPlayingTaskForm albumId={props.albumId} formId={formId} />
+          <InsertCurrentlyPlayingTaskForm
+            album={props.album}
+            formId={formId}
+            onSubmitStart={onSubmitStart}
+          />
           <DialogActions>
             <DialogClose />
             <Button color="primary" form={formId} type="submit">
@@ -104,7 +114,8 @@ const InsertCurrentlyPlayingTaskDialog: Component<InsertCurrentlyPlayingTaskDial
 
 type InsertCurrentlyPlayingTaskFormProps = {
   formId: string;
-  albumId: string;
+  album: SimplifiedAlbum;
+  onSubmitStart: () => void;
 };
 
 const InsertCurrentlyPlayingTaskForm: Component<InsertCurrentlyPlayingTaskFormProps> = (props) => {
@@ -113,7 +124,7 @@ const InsertCurrentlyPlayingTaskForm: Component<InsertCurrentlyPlayingTaskFormPr
 
   const [issues, setIssues] = createSignal<FormIssues>();
 
-  const onSubmit: ComponentProps<"form">["onSubmit"] = action(async function* (event) {
+  const onSubmit: ComponentProps<"form">["onSubmit"] = action(function* (event) {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
@@ -122,24 +133,22 @@ const InsertCurrentlyPlayingTaskForm: Component<InsertCurrentlyPlayingTaskFormPr
       formData,
     );
 
-    console.log("[parsed]", parsed);
-
     if (!parsed.success) {
       setIssues(parseFormValidationError(parsed.issues));
       return;
     }
 
-    const result = await parseResponse(
+    const tasksColumn = tasksContext[parsed.output.status];
+    tasksColumn.insertTask(props.album);
+
+    props.onSubmitStart();
+
+    yield parseResponse(
       honoClient.api.tasks.$post({
-        json: { albumId: props.albumId, ...parsed.output },
+        json: { albumId: props.album.id, ...parsed.output },
       }),
     );
 
-    console.log("[parsed]", result);
-
-    yield result;
-
-    const tasksColumn = tasksContext[parsed.output.status];
     refresh(tasksColumn.resource);
     tasksColumn.setPage(0);
   });

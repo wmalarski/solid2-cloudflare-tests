@@ -1,6 +1,6 @@
 import {
   createContext,
-  createMemo,
+  createOptimisticStore,
   createSignal,
   useContext,
   type Component,
@@ -10,17 +10,65 @@ import type { TaskStatus } from "../validation";
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
 import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED } from "../constansts";
 import { parseResponse } from "hono/client";
+import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
 
 const createSelectTasksResource = (status: TaskStatus) => {
   const honoClient = useHonoClientContext();
 
   const [page, setPage] = createSignal(0);
 
-  const resource = createMemo(() =>
-    parseResponse(honoClient.api.tasks.$get({ query: { status } })),
+  const [resource, setResource] = createOptimisticStore(
+    () => parseResponse(honoClient.api.tasks.$get({ query: { status } })),
+    [],
   );
 
-  return { resource, page, setPage };
+  const insertAlbumAsTask = (album: SimplifiedAlbum) => {
+    setResource((resource) => {
+      resource.splice(0, 0, {
+        id: crypto.randomUUID(),
+        createdAt: null,
+        doneAt: null,
+        note: null,
+        preview: null,
+        rate: null,
+        releaseDate: album.release_date,
+        spotifyArtists: JSON.stringify(album.artists),
+        spotifyId: album.id,
+        status: STATUS_IN_PROGRESS,
+        title: album.name,
+        updatedAt: null,
+        url: album.external_urls.spotify,
+        userId: "self",
+      });
+    });
+  };
+
+  const deleteTask = (taskId: string) => {
+    setResource((resource) => {
+      const indexToDelete = resource.findIndex((element) => element.id === taskId);
+      resource.splice(indexToDelete, 1);
+    });
+  };
+
+  type UpdateTaskArgs = {
+    taskId: string;
+    note: string;
+    rate?: number;
+    status: TaskStatus;
+  };
+
+  const updateTask = (args: UpdateTaskArgs) => {
+    setResource((resource) => {
+      const element = resource.find((element) => element.id === args.taskId);
+      if (element) {
+        element.note = args.note;
+        element.rate = args.rate ?? null;
+        element.status = args.status;
+      }
+    });
+  };
+
+  return { resource, page, setPage, insertTask: insertAlbumAsTask, deleteTask, updateTask };
 };
 
 const createTasksContext = () => {
@@ -33,9 +81,7 @@ const createTasksContext = () => {
 
 type TasksContextValue = ReturnType<typeof createTasksContext>;
 
-export type TaskResourceItem = ReturnType<
-  ReturnType<typeof createSelectTasksResource>["resource"]
->[0];
+export type TaskResourceItem = ReturnType<typeof createSelectTasksResource>["resource"][0];
 
 const TasksContext = createContext<TasksContextValue | null>(null);
 

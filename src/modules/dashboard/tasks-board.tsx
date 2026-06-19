@@ -1,11 +1,9 @@
 import {
   action,
-  createMemo,
   createOptimistic,
   createSignal,
   createUniqueId,
   For,
-  isPending,
   refresh,
   Show,
   type Component,
@@ -64,14 +62,14 @@ const TasksColumn: Component<TasksColumnProps> = (props) => {
       <h2>{statusTranslations(props.status)}</h2>
       <pre>{JSON.stringify({ page: tasksContext[props.status].page }, null, 2)}</pre>
       <ul class="flex flex-col gap-4">
-        <TaskColumnFragment tasks={tasksContext[props.status].resource()} />
+        <TaskColumnFragment tasks={tasksContext[props.status].resource} />
       </ul>
     </div>
   );
 };
 
 type TaskColumnFragmentrops = {
-  tasks: TaskResourceItem[];
+  tasks: readonly TaskResourceItem[];
 };
 
 const TaskColumnFragment: Component<TaskColumnFragmentrops> = (props) => {
@@ -145,16 +143,11 @@ const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
   const honoClient = useHonoClientContext();
   const tasksContext = useTasksContext();
 
-  const [isSubmitting, setIsSubmitting] = createOptimistic(false);
-
-  const resource = createMemo(() => {
-    return tasksContext[props.task.status as TaskStatus].resource;
-  });
-
-  const isLoading = createMemo(() => isSubmitting() || isPending(resource()));
-
   const onSave = action(function* () {
-    setIsSubmitting(true);
+    const tasksColumn = tasksContext[props.task.status as TaskStatus];
+    tasksColumn.deleteTask(props.task.id);
+
+    closeDialog(dialogId);
 
     yield parseResponse(
       honoClient.api.tasks[":taskId"].$delete({
@@ -162,14 +155,12 @@ const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
       }),
     );
 
-    setIsSubmitting(false);
-    closeDialog(dialogId);
-    refresh(resource());
+    refresh(tasksColumn.resource);
   });
 
   return (
     <>
-      <DialogTrigger color="warning" for={dialogId} isLoading={isLoading()}>
+      <DialogTrigger color="warning" for={dialogId}>
         <TrashIcon class="size-4" />
         {t("common.delete")}
       </DialogTrigger>
@@ -178,7 +169,6 @@ const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
         description={t("task.delete.description")}
         title={t("task.delete.title")}
         onSave={onSave}
-        isLoading={isLoading()}
         submitColor="warning"
         submitLabel={t("common.delete")}
       />
@@ -239,8 +229,6 @@ const UpdateTaskForm: Component<UpdateTaskFormProps> = (props) => {
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = action(function* (event) {
     event.preventDefault();
-
-    setIsSubmitting(true);
 
     const formData = new FormData(event.currentTarget);
     const parsed = v.safeParse(
