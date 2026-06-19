@@ -138,8 +138,7 @@ const InsertCurrentlyPlayingTaskForm: Component<InsertCurrentlyPlayingTaskFormPr
       return;
     }
 
-    const tasksColumn = tasksContext[parsed.output.status];
-    tasksColumn.insertTask(props.album);
+    tasksContext.insertAlbumAsTask(props.album);
 
     props.onSubmitStart();
 
@@ -149,6 +148,8 @@ const InsertCurrentlyPlayingTaskForm: Component<InsertCurrentlyPlayingTaskFormPr
       }),
     );
 
+    const status = parsed.output.status;
+    const tasksColumn = tasksContext.columns[status];
     refresh(tasksColumn.resource);
     tasksColumn.setPage(0);
   });

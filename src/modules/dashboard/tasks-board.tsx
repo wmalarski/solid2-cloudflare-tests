@@ -1,13 +1,4 @@
-import {
-  action,
-  createOptimistic,
-  createSignal,
-  createUniqueId,
-  For,
-  refresh,
-  Show,
-  type Component,
-} from "solid-js";
+import { action, createSignal, createUniqueId, For, refresh, Show, type Component } from "solid-js";
 import type { TaskStatus } from "./validation";
 import { useTasksContext, type TaskResourceItem } from "./data-contexts/tasks-context";
 import { BOOKMARK_STATUSES } from "./constansts";
@@ -60,9 +51,9 @@ const TasksColumn: Component<TasksColumnProps> = (props) => {
   return (
     <div class="flex flex-col gap-4">
       <h2>{statusTranslations(props.status)}</h2>
-      <pre>{JSON.stringify({ page: tasksContext[props.status].page }, null, 2)}</pre>
+      <pre>{JSON.stringify({ page: tasksContext.columns[props.status].page }, null, 2)}</pre>
       <ul class="flex flex-col gap-4">
-        <TaskColumnFragment tasks={tasksContext[props.status].resource} />
+        <TaskColumnFragment tasks={tasksContext.columns[props.status].resource} />
       </ul>
     </div>
   );
@@ -144,8 +135,8 @@ const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
   const tasksContext = useTasksContext();
 
   const onSave = action(function* () {
-    const tasksColumn = tasksContext[props.task.status as TaskStatus];
-    tasksColumn.deleteTask(props.task.id);
+    const status = props.task.status as TaskStatus;
+    tasksContext.deleteTask(status, props.task.id);
 
     closeDialog(dialogId);
 
@@ -155,7 +146,9 @@ const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
       }),
     );
 
+    const tasksColumn = tasksContext.columns[status];
     refresh(tasksColumn.resource);
+    tasksColumn.setPage(0);
   });
 
   return (
@@ -225,7 +218,6 @@ const UpdateTaskForm: Component<UpdateTaskFormProps> = (props) => {
   const tasksContext = useTasksContext();
 
   const [issues, setIssues] = createSignal<FormIssues>();
-  const [isSubmitting, setIsSubmitting] = createOptimistic(false);
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = action(function* (event) {
     event.preventDefault();
@@ -241,6 +233,9 @@ const UpdateTaskForm: Component<UpdateTaskFormProps> = (props) => {
       return;
     }
 
+    const status = props.task.status as TaskStatus;
+    tasksContext.updateTask(status, { ...parsed.output, taskId: props.task.id });
+
     yield parseResponse(
       honoClient.api.tasks[":taskId"].$put({
         param: { taskId: props.task.id },
@@ -248,17 +243,22 @@ const UpdateTaskForm: Component<UpdateTaskFormProps> = (props) => {
       }),
     );
 
-    setIsSubmitting(false);
     props.onSuccess();
 
-    const tasksColumn = tasksContext[parsed.output.status];
+    const tasksColumn = tasksContext.columns[status];
     refresh(tasksColumn.resource);
     tasksColumn.setPage(0);
+
+    if (status !== parsed.output.status) {
+      const tasksColumn = tasksContext.columns[parsed.output.status];
+      refresh(tasksColumn.resource);
+      tasksColumn.setPage(0);
+    }
   });
 
   return (
     <form onSubmit={onSubmit} id={props.formId}>
-      <TaskFields initialValues={props.task} pending={isSubmitting()} issues={issues()} />
+      <TaskFields initialValues={props.task} issues={issues()} />
     </form>
   );
 };

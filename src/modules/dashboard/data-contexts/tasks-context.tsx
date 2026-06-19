@@ -22,8 +22,20 @@ const createSelectTasksResource = (status: TaskStatus) => {
     [],
   );
 
+  return { resource, page, setPage, setResource };
+};
+
+export type TaskResourceItem = ReturnType<typeof createSelectTasksResource>["resource"][0];
+
+const createTasksContext = () => {
+  const columns = {
+    [STATUS_NEW]: createSelectTasksResource(STATUS_NEW),
+    [STATUS_IN_PROGRESS]: createSelectTasksResource(STATUS_IN_PROGRESS),
+    [STATUS_REVIEWED]: createSelectTasksResource(STATUS_REVIEWED),
+  };
+
   const insertAlbumAsTask = (album: SimplifiedAlbum) => {
-    setResource((resource) => {
+    columns[STATUS_IN_PROGRESS].setResource((resource) => {
       resource.splice(0, 0, {
         id: crypto.randomUUID(),
         createdAt: null,
@@ -43,8 +55,8 @@ const createSelectTasksResource = (status: TaskStatus) => {
     });
   };
 
-  const deleteTask = (taskId: string) => {
-    setResource((resource) => {
+  const deleteTask = (status: TaskStatus, taskId: string) => {
+    columns[status].setResource((resource) => {
       const indexToDelete = resource.findIndex((element) => element.id === taskId);
       resource.splice(indexToDelete, 1);
     });
@@ -57,31 +69,42 @@ const createSelectTasksResource = (status: TaskStatus) => {
     status: TaskStatus;
   };
 
-  const updateTask = (args: UpdateTaskArgs) => {
-    setResource((resource) => {
-      const element = resource.find((element) => element.id === args.taskId);
-      if (element) {
-        element.note = args.note;
-        element.rate = args.rate ?? null;
-        element.status = args.status;
-      }
+  const updateTask = (status: TaskStatus, args: UpdateTaskArgs) => {
+    const sameStatus = status === args.status;
+    const taskId = args.taskId;
+
+    if (sameStatus) {
+      columns[status].setResource((resource) => {
+        const element = resource.find((element) => element.id === taskId);
+        if (element) {
+          element.note = args.note;
+          element.rate = args.rate ?? null;
+        }
+      });
+      return;
+    }
+
+    const taskToRemove = columns[status].resource.find((element) => element.id === taskId);
+    if (!taskToRemove) {
+      return;
+    }
+
+    deleteTask(status, taskId);
+
+    columns[args.status].setResource((resource) => {
+      resource.splice(0, 0, {
+        ...taskToRemove,
+        note: args.note,
+        rate: args.rate ?? null,
+        status: args.status,
+      });
     });
   };
 
-  return { resource, page, setPage, insertTask: insertAlbumAsTask, deleteTask, updateTask };
-};
-
-const createTasksContext = () => {
-  return {
-    [STATUS_NEW]: createSelectTasksResource(STATUS_NEW),
-    [STATUS_IN_PROGRESS]: createSelectTasksResource(STATUS_IN_PROGRESS),
-    [STATUS_REVIEWED]: createSelectTasksResource(STATUS_REVIEWED),
-  };
+  return { columns, insertAlbumAsTask, deleteTask, updateTask };
 };
 
 type TasksContextValue = ReturnType<typeof createTasksContext>;
-
-export type TaskResourceItem = ReturnType<typeof createSelectTasksResource>["resource"][0];
 
 const TasksContext = createContext<TasksContextValue | null>(null);
 
