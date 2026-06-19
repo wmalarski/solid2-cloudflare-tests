@@ -10,7 +10,13 @@ type AuthContextValue = ReturnType<typeof createSessionResource>;
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const useAuthContext = () => {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("AuthContext is not defined");
+  }
+
+  return context;
 };
 
 type AuthContextProviderProps = ParentProps<{ value: AuthContextValue }>;

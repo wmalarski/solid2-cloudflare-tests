@@ -12,6 +12,7 @@ import {
 const enDict = {
   auth: {
     signInWithSpotify: "Sign In With Spotify",
+    signOut: "Sign Out",
   },
   task: {
     note: "Note",
