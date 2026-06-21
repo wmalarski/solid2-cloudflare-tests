@@ -34,6 +34,9 @@ const enDict = {
       title: "Update task",
       description: "Update selected task",
     },
+    details: {
+      more: "More",
+    },
   },
   currentlyPlaying: {
     addTask: {

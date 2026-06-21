@@ -26,7 +26,8 @@ export const fetchSpotify = async <T = unknown>({
 }: FetchSpotifyArgs): Promise<T | null> => {
   const searchParams = buildSearchParams(query);
 
-  const url = `${SPOTIFY_BASE_URL}${path}?${searchParams}`;
+  const suffix = searchParams.size > 0 ? `?${searchParams}` : "";
+  const url = `${SPOTIFY_BASE_URL}${path}${suffix}`;
 
   const headers = new Headers(init?.headers);
   headers.set("Authorization", `Bearer ${accessTokens.accessToken}`);
@@ -34,6 +35,11 @@ export const fetchSpotify = async <T = unknown>({
   const response = await fetch(url, { ...init, headers });
 
   if (!response.ok) {
+    console.error("[ERROR]", url, response, accessTokens, headers);
+
+    const text = await response.text();
+    console.log("[text]", text);
+
     throw new Error(response.statusText);
   }
 
@@ -45,7 +51,7 @@ export const fetchSpotify = async <T = unknown>({
     const json = await response.json();
     return json as T;
   } catch (error) {
-    console.log("[error]", error, response);
+    console.log("[error]", error, url);
     throw new Error(response.statusText);
   }
 };
@@ -131,26 +137,40 @@ export const getSpotifyRelatedAlbums = async ({
   accessTokens,
   artistIds,
 }: GetSpotifyRelatedAlbumsArgs) => {
-  const relatedArtists = await Promise.all(
-    artistIds.map((artistId) => getSpotifyRelatedArtists({ accessTokens, artistId })),
-  );
+  try {
+    const relatedArtists = await Promise.all(
+      artistIds.map((artistId) => getSpotifyRelatedArtists({ accessTokens, artistId })),
+    );
 
-  const allRelatedArtists = relatedArtists
-    .flatMap((artists) => artists?.artists ?? [])
-    .filter((artist) => !artistIds.includes(artist.id));
+    console.log(JSON.stringify({ relatedArtists }, null, 2));
 
-  const relatedArtistMap = new Map(allRelatedArtists.map((artist) => [artist.id, artist] as const));
+    const allRelatedArtists = relatedArtists
+      .flatMap((artists) => artists?.artists ?? [])
+      .filter((artist) => !artistIds.includes(artist.id));
 
-  const relatedArtistIds = [...relatedArtistMap.keys()];
+    console.log(JSON.stringify({ allRelatedArtists }, null, 2));
 
-  const artistsAlbums = await Promise.all(
-    relatedArtistIds.map((artistId) => getSpotifyArtistAlbums({ accessTokens, artistId })),
-  );
+    const relatedArtistMap = new Map(
+      allRelatedArtists.map((artist) => [artist.id, artist] as const),
+    );
 
-  return artistsAlbums.flatMap((albums, index) => {
-    const artist = relatedArtistMap.get(relatedArtistIds[index]);
-    return artist ? [{ artist, albums: albums?.items ?? [] }] : [];
-  });
+    const relatedArtistIds = [...relatedArtistMap.keys()];
+
+    console.log(JSON.stringify({ relatedArtistIds }, null, 2));
+
+    const artistsAlbums = await Promise.all(
+      relatedArtistIds.map((artistId) => getSpotifyArtistAlbums({ accessTokens, artistId })),
+    );
+
+    console.log(JSON.stringify({ artistsAlbums }, null, 2));
+
+    return artistsAlbums.flatMap((albums, index) => {
+      const artist = relatedArtistMap.get(relatedArtistIds[index]);
+      return artist ? [{ artist, albums: albums?.items ?? [] }] : [];
+    });
+  } catch {
+    return [];
+  }
 };
 
 type GetSpotifyCurrentlyPlayingTrackArgs = WithAccessTokens;

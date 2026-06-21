@@ -1,4 +1,12 @@
-import { createMemo, createUniqueId, For, Loading, type Component } from "solid-js";
+import {
+  createMemo,
+  createSignal,
+  createUniqueId,
+  For,
+  Loading,
+  Show,
+  type Component,
+} from "solid-js";
 import type { Image, SimplifiedArtist } from "@spotify/web-api-ts-sdk";
 import { type TaskResourceItem } from "./data-contexts/tasks-context";
 import {
@@ -11,7 +19,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/ui/dialog/dialog";
-import { PlusIcon } from "~/ui/icons/plus-icon";
 import { useI18n } from "~/integrations/i18n";
 import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
 import { parseImages, parseSimplifiedArtist } from "./parsers";
@@ -23,6 +30,7 @@ import { useHonoClientContext } from "~/integrations/hono-client/hono-client-con
 import { parseResponse } from "hono/client";
 import { Card, CardActions, CardBody } from "~/ui/card/card";
 import { InsertTaskDialog } from "./insert-task-dialog";
+import { InfoIcon } from "~/ui/icons/info-icon";
 
 type TaskDetailsDialogProps = {
   task: TaskResourceItem;
@@ -72,17 +80,26 @@ const DetailsDialog: Component<DetailsDialogProps> = (props) => {
   const artistsNamesFormatter = createArtistsNamesFormatter();
   const dateFormatter = createDateFormatter();
 
-  const artistIds = createMemo(() => props.artists.map((artist) => artist.id));
+  const [open, setOpen] = createSignal(false);
+
+  const onClose = () => {
+    setOpen(false);
+  };
+
+  const onOpen = () => {
+    setOpen(true);
+  };
 
   return (
     <>
-      <DialogTrigger color="primary" size="sm" for={dialogId}>
-        <PlusIcon class="size-4" />
-        {t("currentlyPlaying.addTask.trigger")}
+      <DialogTrigger color="info" size="sm" for={dialogId} onClick={onOpen}>
+        <InfoIcon class="size-4" />
+        {t("task.details.more")}
       </DialogTrigger>
-      <Dialog id={dialogId}>
+      <Dialog id={dialogId} open={open()} onClose={onClose}>
         <DialogBox>
-          <DialogTitle>{props.name}</DialogTitle>
+          <AlbumImage images={props.images} size={640} />
+          <DialogTitle class="pt-4">{props.name}</DialogTitle>
           <DialogDescription>{artistsNamesFormatter(props.artists)}</DialogDescription>
           <InfoRowContainer>
             <InfoRowItem
@@ -90,13 +107,14 @@ const DetailsDialog: Component<DetailsDialogProps> = (props) => {
               value={props.relaseDate ? dateFormatter(props.relaseDate) : undefined}
             />
           </InfoRowContainer>
-          <AlbumImage images={props.images} size={300} />
-          <Loading>
-            <For each={props.artists}>
-              {(artist) => <ArtistAlbumsList name={artist.name} artistId={artist.id} />}
-            </For>
-            <RelatedArtistAlbumsList artistIds={artistIds()} />
-          </Loading>
+          <Show when={open()}>
+            <Loading>
+              <For each={props.artists}>
+                {(artist) => <ArtistAlbumsList name={artist.name} artistId={artist.id} />}
+              </For>
+              <RelatedArtistAlbumsList artistIds={props.artists.map((artist) => artist.id)} />
+            </Loading>
+          </Show>
           <DialogActions>
             <DialogClose />
           </DialogActions>
@@ -132,7 +150,9 @@ const RelatedArtistAlbumsList: Component<RelatedArtistAlbumsListProps> = (props)
   const honoClient = useHonoClientContext();
 
   const relatedArtistsAndAlbums = createMemo(() =>
-    parseResponse(honoClient.api.artists.related.$get({ query: { artistIds: props.artistIds } })),
+    parseResponse(
+      honoClient.api.artists.related.$get({ query: { artistIds: props.artistIds.join(",") } }),
+    ),
   );
 
   return (
@@ -151,8 +171,7 @@ const AlbumsList: Component<AlbumsListProps> = (props) => {
   return (
     <div>
       <span>{props.name}</span>
-      <pre>{JSON.stringify(props.albums, null, 2)}</pre>
-      <ul>
+      <ul class="flex gap-2 max-w-full overflow-auto">
         <For each={props.albums}>{(album) => <AlbumsListItem album={album} />}</For>
       </ul>
     </div>
@@ -165,7 +184,7 @@ type AlbumsListItemProps = {
 
 const AlbumsListItem: Component<AlbumsListItemProps> = (props) => {
   return (
-    <li>
+    <li class="h-auto min-w-64">
       <Card>
         <AlbumImage images={props.album.images} size={300} />
         <CardBody>

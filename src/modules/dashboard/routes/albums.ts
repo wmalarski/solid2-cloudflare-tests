@@ -5,7 +5,12 @@ import { sValidator } from "@hono/standard-validator";
 import * as v from "valibot";
 
 const albumIdSchema = v.object({ albumId: v.string() });
-const albumIdsSchema = v.object({ albumIds: v.array(v.string()) });
+const albumIdsSchema = v.object({
+  albumIds: v.pipe(
+    v.string(),
+    v.transform((value) => value.split(",")),
+  ),
+});
 
 export const albumsRoute = factory
   .createApp()

@@ -48,7 +48,9 @@ export const AlbumInformationSection: Component<AlbumInformationSectionProps> = 
 
   return (
     <div class="flex flex-col gap-2">
-      <CardTitle component="span">{props.album.name}</CardTitle>
+      <CardTitle class="truncate" component="span">
+        {props.album.name}
+      </CardTitle>
       <CardDescription>{artistsNamesFormatter(props.album.artists)}</CardDescription>
       <InfoRowContainer>
         <InfoRowItem

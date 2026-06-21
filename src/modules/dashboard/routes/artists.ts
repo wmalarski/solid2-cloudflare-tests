@@ -1,4 +1,4 @@
-import { authorizedMiddleware } from "~/integrations/better-auth/middleware";
+import { accessTokenMiddleware, authorizedMiddleware } from "~/integrations/better-auth/middleware";
 import {
   getSpotifyArtist,
   getSpotifyArtistAlbums,
@@ -11,17 +11,16 @@ import { sValidator } from "@hono/standard-validator";
 import * as v from "valibot";
 
 const artistIdSchema = v.object({ artistId: v.string() });
-const artistIdsSchema = v.object({ artistIds: v.array(v.string()) });
+const artistIdsSchema = v.object({
+  artistIds: v.pipe(
+    v.string(),
+    v.transform((value) => value.split(",")),
+  ),
+});
 
 export const artistsRoute = factory
   .createApp()
-  .use(authorizedMiddleware)
-  .get("/:artistId", sValidator("param", artistIdSchema), async (context) => {
-    const accessTokens = context.get("accessTokens");
-    const artistId = context.req.valid("param").artistId;
-    const response = await getSpotifyArtist({ artistId, accessTokens });
-    return context.json(response);
-  })
+  .use(authorizedMiddleware, accessTokenMiddleware)
   .get("/", sValidator("query", artistIdsSchema), async (context) => {
     const accessTokens = context.get("accessTokens");
     const artistIds = context.req.valid("query").artistIds;
@@ -29,9 +28,19 @@ export const artistsRoute = factory
     return context.json(response);
   })
   .get("/related", sValidator("query", artistIdsSchema), async (context) => {
+    console.log("[related]");
     const accessTokens = context.get("accessTokens");
+    console.log("[related]", JSON.stringify({ accessTokens }, null, 2));
     const artistIds = context.req.valid("query").artistIds;
+    console.log("[related]", JSON.stringify({ artistIds }, null, 2));
     const response = await getSpotifyRelatedAlbums({ artistIds, accessTokens });
+    console.log("[related]", JSON.stringify({ response }, null, 2));
+    return context.json(response);
+  })
+  .get("/:artistId", sValidator("param", artistIdSchema), async (context) => {
+    const accessTokens = context.get("accessTokens");
+    const artistId = context.req.valid("param").artistId;
+    const response = await getSpotifyArtist({ artistId, accessTokens });
     return context.json(response);
   })
   .get("/:artistId/albums", sValidator("param", artistIdSchema), async (context) => {
