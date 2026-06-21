@@ -5,6 +5,7 @@ import { useI18n } from "~/integrations/i18n";
 type AlbumImageProps = {
   images: Image[];
   size: 64 | 300 | 640;
+  containerSize?: number;
 };
 
 export const AlbumImage: Component<AlbumImageProps> = (props) => {
@@ -21,8 +22,8 @@ export const AlbumImage: Component<AlbumImageProps> = (props) => {
           <img
             src={source().url}
             alt={t("task.image")}
-            width={source().width}
-            height={source().height}
+            width={props.containerSize ?? source().width}
+            height={props.containerSize ?? source().height}
           />
         </figure>
       )}

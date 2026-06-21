@@ -54,17 +54,19 @@ export const CurrentlyPlayingSection: Component = () => {
   return (
     <Show when={album()}>
       {(album) => (
-        <Card side size="md">
+        <Card side size="xs" class="h-28">
           <AlbumImage images={album().images} size={300} />
-          <CardBody>
-            <CardTitle component="span">{album().name}</CardTitle>
-            <CardDescription>{artistsNamesFormatter(album().artists)}</CardDescription>
-            <InfoRowContainer class="pb-5">
-              <InfoRowItem
-                name={t("task.releaseDate")}
-                value={album().release_date ? dateFormatter(album().release_date) : undefined}
-              />
-            </InfoRowContainer>
+          <CardBody class="flex-row justify-between w-full">
+            <div class="flex flex-col gap-2">
+              <CardTitle component="span">{album().name}</CardTitle>
+              <CardDescription>{artistsNamesFormatter(album().artists)}</CardDescription>
+              <InfoRowContainer>
+                <InfoRowItem
+                  name={t("task.releaseDate")}
+                  value={album().release_date ? dateFormatter(album().release_date) : undefined}
+                />
+              </InfoRowContainer>
+            </div>
             <CardActions>
               <InsertCurrentlyPlayingTaskDialog album={album()} />
             </CardActions>
@@ -93,7 +95,7 @@ const InsertCurrentlyPlayingTaskDialog: Component<InsertCurrentlyPlayingTaskDial
 
   return (
     <>
-      <DialogTrigger color="primary" for={dialogId}>
+      <DialogTrigger color="primary" size="sm" for={dialogId}>
         <PlusIcon class="size-4" />
         {t("currentlyPlaying.addTask.trigger")}
       </DialogTrigger>

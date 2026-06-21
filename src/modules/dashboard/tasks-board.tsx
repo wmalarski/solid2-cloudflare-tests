@@ -34,7 +34,7 @@ import { InfoRowContainer, InfoRowItem } from "~/ui/info-row/info-row";
 
 export const TasksBoard: Component = () => {
   return (
-    <div class="grid grid-cols-3 p-4">
+    <div class="grid grid-cols-3 p-4 max-w-full overflow-auto">
       <For each={BOOKMARK_STATUSES}>{(status) => <TasksColumn status={status} />}</For>
     </div>
   );
