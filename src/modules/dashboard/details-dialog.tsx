@@ -1,4 +1,4 @@
-import { createMemo, createUniqueId, For, type Component } from "solid-js";
+import { createMemo, createUniqueId, For, Loading, type Component } from "solid-js";
 import type { Image, SimplifiedArtist } from "@spotify/web-api-ts-sdk";
 import { type TaskResourceItem } from "./data-contexts/tasks-context";
 import {
@@ -70,6 +70,8 @@ const DetailsDialog: Component<DetailsDialogProps> = (props) => {
   const artistsNamesFormatter = createArtistsNamesFormatter();
   const dateFormatter = createDateFormatter();
 
+  const artistIds = createMemo(() => props.artists.map((artist) => artist.id));
+
   return (
     <>
       <DialogTrigger color="primary" size="sm" for={dialogId}>
@@ -87,9 +89,12 @@ const DetailsDialog: Component<DetailsDialogProps> = (props) => {
             />
           </InfoRowContainer>
           <AlbumImage images={props.images} size={300} />
-          <For each={props.artists}>
-            {(artist) => <ArtistAlbumsList name={artist.name} artistId={artist.id} />}
-          </For>
+          <Loading>
+            <For each={props.artists}>
+              {(artist) => <ArtistAlbumsList name={artist.name} artistId={artist.id} />}
+            </For>
+            <RelatedArtistAlbumsList artistIds={artistIds()} />
+          </Loading>
           <DialogActions>
             <DialogClose />
           </DialogActions>
@@ -114,10 +119,37 @@ const ArtistAlbumsList: Component<ArtistAlbumsListProps> = (props) => {
     ),
   );
 
+  return <AlbumsList albums={artistAlbums()?.items ?? []} name={props.name} />;
+};
+
+type RelatedArtistAlbumsListProps = {
+  artistIds: string[];
+};
+
+const RelatedArtistAlbumsList: Component<RelatedArtistAlbumsListProps> = (props) => {
+  const honoClient = useHonoClientContext();
+
+  const relatedArtistsAndAlbums = createMemo(() =>
+    parseResponse(honoClient.api.artists.related.$get({ query: { artistIds: props.artistIds } })),
+  );
+
+  return (
+    <For each={relatedArtistsAndAlbums()}>
+      {(element) => <AlbumsList albums={element.albums} name={element.artist.name} />}
+    </For>
+  );
+};
+
+type AlbumsListProps = {
+  name: string;
+  albums: SimplifiedAlbum[];
+};
+
+const AlbumsList: Component<AlbumsListProps> = (props) => {
   return (
     <div>
       <span>{props.name}</span>
-      <pre>{JSON.stringify(artistAlbums(), null, 2)}</pre>
+      <pre>{JSON.stringify(props.albums, null, 2)}</pre>
     </div>
   );
 };
