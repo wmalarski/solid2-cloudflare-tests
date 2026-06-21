@@ -19,7 +19,7 @@ import {
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { parseResponse } from "hono/client";
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
-import { AlbumImage } from "./album-image";
+import { AlbumImage } from "./album-card-fragments";
 import { parseImages, parseSimplifiedArtist } from "./parsers";
 import { createArtistsNamesFormatter } from "~/integrations/spotify/formatters";
 import * as v from "valibot";
@@ -31,6 +31,7 @@ import { Button } from "~/ui/button/button";
 import { createDateFormatter } from "~/integrations/i18n/create-date-formatter";
 import { useStatusTranslations } from "./use-status-translations";
 import { InfoRowContainer, InfoRowItem } from "~/ui/info-row/info-row";
+import { TaskDetailsDialog } from "./details-dialog";
 
 export const TasksBoard: Component = () => {
   return (
@@ -81,7 +82,7 @@ const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
   return (
     <li class="w-75">
       <Card>
-        <AlbumImage images={parseImages(props.task.preview ?? "")} size={300} />
+        <AlbumImage images={parseImages(props.task.preview)} size={300} />
         <CardBody>
           <CardTitle component="span">{props.task.title}</CardTitle>
           <CardDescription>
@@ -102,6 +103,7 @@ const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
           <CardActions>
             <UpdateTaskDialog task={props.task} />
             <DeleteTaskDialog task={props.task} />
+            <TaskDetailsDialog task={props.task} />
           </CardActions>
         </CardBody>
       </Card>
@@ -140,7 +142,7 @@ const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
 
   return (
     <>
-      <DialogTrigger color="warning" for={dialogId}>
+      <DialogTrigger color="warning" size="sm" for={dialogId}>
         <TrashIcon class="size-4" />
         {t("common.delete")}
       </DialogTrigger>
@@ -172,7 +174,7 @@ const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
 
   return (
     <>
-      <DialogTrigger color="primary" for={dialogId}>
+      <DialogTrigger color="primary" size="sm" for={dialogId}>
         <PencilIcon class="size-4" />
         {t("common.update")}
       </DialogTrigger>

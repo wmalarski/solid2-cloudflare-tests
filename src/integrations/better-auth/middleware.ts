@@ -39,16 +39,21 @@ export const accessTokenMiddleware = factory.createMiddleware(async (context, ne
   const session = context.get("session");
   const auth = context.get("auth");
 
-  try {
-    const accessToken = await auth.api.getAccessToken({
+  const tryGetAccessToken = () => {
+    return auth.api.getAccessToken({
       headers: context.req.raw.headers,
       body: { providerId: "spotify", userId: session?.userId },
+      request: context.req.raw,
     });
-    context.set("accessTokens", accessToken);
-  } catch (error) {
-    console.log("[EEERRROR]", error);
-    return next();
-  }
+  };
 
+  // try {
+  //   const accessToken = await tryGetAccessToken();
+  //   context.set("accessTokens", accessToken);
+  //   return next();
+  // } catch {}
+
+  const accessToken = await tryGetAccessToken();
+  context.set("accessTokens", accessToken);
   return next();
 });

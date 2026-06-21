@@ -15,12 +15,14 @@ import { PlusIcon } from "~/ui/icons/plus-icon";
 import { useI18n } from "~/integrations/i18n";
 import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
 import { parseImages, parseSimplifiedArtist } from "./parsers";
-import { AlbumImage } from "./album-image";
+import { AlbumImage, AlbumInformationSection } from "./album-card-fragments";
 import { createArtistsNamesFormatter } from "~/integrations/spotify/formatters";
 import { InfoRowContainer, InfoRowItem } from "~/ui/info-row/info-row";
 import { createDateFormatter } from "~/integrations/i18n/create-date-formatter";
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
 import { parseResponse } from "hono/client";
+import { Card, CardActions, CardBody } from "~/ui/card/card";
+import { InsertTaskDialog } from "./insert-task-dialog";
 
 type TaskDetailsDialogProps = {
   task: TaskResourceItem;
@@ -150,6 +152,29 @@ const AlbumsList: Component<AlbumsListProps> = (props) => {
     <div>
       <span>{props.name}</span>
       <pre>{JSON.stringify(props.albums, null, 2)}</pre>
+      <ul>
+        <For each={props.albums}>{(album) => <AlbumsListItem album={album} />}</For>
+      </ul>
     </div>
+  );
+};
+
+type AlbumsListItemProps = {
+  album: SimplifiedAlbum;
+};
+
+const AlbumsListItem: Component<AlbumsListItemProps> = (props) => {
+  return (
+    <li>
+      <Card>
+        <AlbumImage images={props.album.images} size={300} />
+        <CardBody>
+          <AlbumInformationSection album={props.album} />
+          <CardActions>
+            <InsertTaskDialog album={props.album} />
+          </CardActions>
+        </CardBody>
+      </Card>
+    </li>
   );
 };
