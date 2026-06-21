@@ -2,7 +2,7 @@ import type { SimplifiedArtist, Image } from "@spotify/web-api-ts-sdk";
 import * as v from "valibot";
 
 const parseSimplifiedArtistPipeline = v.pipe(
-  v.string(),
+  v.nullish(v.string(), "[]"),
   v.parseJson(),
   v.array(
     v.object({
@@ -18,13 +18,13 @@ const parseSimplifiedArtistPipeline = v.pipe(
   ),
 );
 
-export const parseSimplifiedArtist = (artistsString: string): SimplifiedArtist[] => {
+export const parseSimplifiedArtist = (artistsString?: string | null): SimplifiedArtist[] => {
   const parsed = v.safeParse(parseSimplifiedArtistPipeline, artistsString);
   return parsed.success ? parsed.output : [];
 };
 
 const parseImagesPipeline = v.pipe(
-  v.string(),
+  v.nullish(v.string(), "[]"),
   v.parseJson(),
   v.array(
     v.object({
@@ -35,7 +35,7 @@ const parseImagesPipeline = v.pipe(
   ),
 );
 
-export const parseImages = (imagesString: string): Image[] => {
+export const parseImages = (imagesString?: string | null): Image[] => {
   const parsed = v.safeParse(parseImagesPipeline, imagesString);
   return parsed.success ? parsed.output : [];
 };

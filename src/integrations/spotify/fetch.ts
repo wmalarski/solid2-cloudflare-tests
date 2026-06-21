@@ -123,6 +123,36 @@ export const getSpotifyRelatedArtists = ({
   });
 };
 
+type GetSpotifyRelatedAlbumsArgs = WithAccessTokens<{
+  artistIds: string[];
+}>;
+
+export const getSpotifyRelatedAlbums = async ({
+  accessTokens,
+  artistIds,
+}: GetSpotifyRelatedAlbumsArgs) => {
+  const relatedArtists = await Promise.all(
+    artistIds.map((artistId) => getSpotifyRelatedArtists({ accessTokens, artistId })),
+  );
+
+  const allRelatedArtists = relatedArtists
+    .flatMap((artists) => artists?.artists ?? [])
+    .filter((artist) => !artistIds.includes(artist.id));
+
+  const relatedArtistMap = new Map(allRelatedArtists.map((artist) => [artist.id, artist] as const));
+
+  const relatedArtistIds = [...relatedArtistMap.keys()];
+
+  const artistsAlbums = await Promise.all(
+    relatedArtistIds.map((artistId) => getSpotifyArtistAlbums({ accessTokens, artistId })),
+  );
+
+  return artistsAlbums.flatMap((albums, index) => {
+    const artist = relatedArtistMap.get(relatedArtistIds[index]);
+    return artist ? [{ artist, albums: albums?.items ?? [] }] : [];
+  });
+};
+
 type GetSpotifyCurrentlyPlayingTrackArgs = WithAccessTokens;
 
 export const getSpotifyCurrentlyPlayingTrack = ({

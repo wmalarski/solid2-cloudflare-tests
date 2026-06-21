@@ -3,6 +3,7 @@ import {
   getSpotifyArtist,
   getSpotifyArtistAlbums,
   getSpotifyArtists,
+  getSpotifyRelatedAlbums,
   getSpotifyRelatedArtists,
 } from "~/integrations/spotify/fetch";
 import { factory } from "~/worker/factory";
@@ -25,6 +26,12 @@ export const artistsRoute = factory
     const accessTokens = context.get("accessTokens");
     const artistIds = context.req.valid("query").artistIds;
     const response = await getSpotifyArtists({ artistIds, accessTokens });
+    return context.json(response);
+  })
+  .get("/related", sValidator("query", artistIdsSchema), async (context) => {
+    const accessTokens = context.get("accessTokens");
+    const artistIds = context.req.valid("query").artistIds;
+    const response = await getSpotifyRelatedAlbums({ artistIds, accessTokens });
     return context.json(response);
   })
   .get("/:artistId/albums", sValidator("param", artistIdSchema), async (context) => {
