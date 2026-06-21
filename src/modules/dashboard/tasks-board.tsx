@@ -1,4 +1,4 @@
-import { action, createSignal, createUniqueId, For, refresh, Show, type Component } from "solid-js";
+import { action, createSignal, createUniqueId, For, refresh, type Component } from "solid-js";
 import type { TaskStatus } from "./validation";
 import { useTasksContext, type TaskResourceItem } from "./data-contexts/tasks-context";
 import { BOOKMARK_STATUSES } from "./constansts";
@@ -30,6 +30,7 @@ import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { Button } from "~/ui/button/button";
 import { createDateFormatter } from "~/integrations/i18n/create-date-formatter";
 import { useStatusTranslations } from "./use-status-translations";
+import { InfoRowContainer, InfoRowItem } from "~/ui/info-row/info-row";
 
 export const TasksBoard: Component = () => {
   return (
@@ -86,18 +87,18 @@ const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
           <CardDescription>
             {artistsNamesFormatter(parseSimplifiedArtist(props.task.spotifyArtists))}
           </CardDescription>
-          <div class="grid grid-cols-2 gap-2 pb-4">
-            <TaskInfoPair
+          <InfoRowContainer class="pb-5">
+            <InfoRowItem
               name={t("task.releaseDate")}
               value={props.task.releaseDate ? dateFormatter(props.task.releaseDate) : undefined}
             />
-            <TaskInfoPair name={t("task.note")} value={props.task.note ?? undefined} />
-            <TaskInfoPair
+            <InfoRowItem name={t("task.note")} value={props.task.note ?? undefined} />
+            <InfoRowItem
               name={t("task.rate")}
               value={props.task.rate !== null ? String(props.task.rate) : undefined}
             />
-            <TaskInfoPair name={t("task.doneAt")} value={props.task.doneAt ?? undefined} />
-          </div>
+            <InfoRowItem name={t("task.doneAt")} value={props.task.doneAt ?? undefined} />
+          </InfoRowContainer>
           <CardActions>
             <UpdateTaskDialog task={props.task} />
             <DeleteTaskDialog task={props.task} />
@@ -105,20 +106,6 @@ const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
         </CardBody>
       </Card>
     </li>
-  );
-};
-
-type TaskInfoPairProps = {
-  name: string;
-  value?: string;
-};
-
-const TaskInfoPair: Component<TaskInfoPairProps> = (props) => {
-  return (
-    <Show when={props.value && props.value.length > 0}>
-      <span>{props.name}</span>
-      <span>{props.value}</span>
-    </Show>
   );
 };
 

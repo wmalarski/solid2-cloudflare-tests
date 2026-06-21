@@ -8,8 +8,10 @@ export const DashboardContainer: Component = () => {
   return (
     <TasksContextProvider>
       <CurrentlyPlayingContextProvider>
-        <TopBar />
-        <TasksBoard />
+        <main>
+          <TopBar />
+          <TasksBoard />
+        </main>
       </CurrentlyPlayingContextProvider>
     </TasksContextProvider>
   );

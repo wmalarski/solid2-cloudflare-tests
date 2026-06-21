@@ -34,8 +34,11 @@ import { createDateFormatter } from "~/integrations/i18n/create-date-formatter";
 import { parseResponse } from "hono/client";
 import { AlbumImage } from "./album-image";
 import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
+import { InfoRowContainer, InfoRowItem } from "~/ui/info-row/info-row";
 
 export const CurrentlyPlayingSection: Component = () => {
+  const { t } = useI18n();
+
   const currentlyPlayingContext = useCurrentlyPlayingContext();
 
   const artistsNamesFormatter = createArtistsNamesFormatter();
@@ -51,13 +54,17 @@ export const CurrentlyPlayingSection: Component = () => {
   return (
     <Show when={album()}>
       {(album) => (
-        <Card>
-          <AlbumImage images={album().images} size={64} />
+        <Card side size="md">
+          <AlbumImage images={album().images} size={300} />
           <CardBody>
             <CardTitle component="span">{album().name}</CardTitle>
             <CardDescription>{artistsNamesFormatter(album().artists)}</CardDescription>
-            <CardDescription>{dateFormatter(album().release_date)}</CardDescription>
-            <pre>{JSON.stringify(album(), null, 2)}</pre>
+            <InfoRowContainer class="pb-5">
+              <InfoRowItem
+                name={t("task.releaseDate")}
+                value={album().release_date ? dateFormatter(album().release_date) : undefined}
+              />
+            </InfoRowContainer>
             <CardActions>
               <InsertCurrentlyPlayingTaskDialog album={album()} />
             </CardActions>

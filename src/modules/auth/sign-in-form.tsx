@@ -7,14 +7,10 @@ import { authClient } from "~/integrations/better-auth/auth-client";
 export const SignInForm: Component = () => {
   const { t } = useI18n();
 
-  // const authContext = useAuthContext();
-
   const onSubmit: ComponentProps<"form">["onSubmit"] = action(function* (event) {
     event.preventDefault();
 
     yield authClient.signIn.social({ provider: "spotify" });
-
-    // refresh(authContext);
   });
 
   return (
