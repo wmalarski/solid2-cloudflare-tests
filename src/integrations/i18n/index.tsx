@@ -21,6 +21,7 @@ const enDict = {
     image: "Album image",
     doneAt: "Done at",
     releaseDate: "Release Date",
+    play: "Play",
     statuses: {
       inProgress: "In progress",
       new: "New",

@@ -32,6 +32,7 @@ import { createDateFormatter } from "~/integrations/i18n/create-date-formatter";
 import { useStatusTranslations } from "./use-status-translations";
 import { InfoRowContainer, InfoRowItem } from "~/ui/info-row/info-row";
 import { TaskDetailsDialog } from "./details-dialog";
+import { StartTaskPlaybackButton } from "./start-playback-button";
 
 export const TasksBoard: Component = () => {
   return (
@@ -101,6 +102,7 @@ const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
             <InfoRowItem name={t("task.doneAt")} value={props.task.doneAt ?? undefined} />
           </InfoRowContainer>
           <CardActions>
+            <StartTaskPlaybackButton task={props.task} />
             <UpdateTaskDialog task={props.task} />
             <DeleteTaskDialog task={props.task} />
             <TaskDetailsDialog task={props.task} />

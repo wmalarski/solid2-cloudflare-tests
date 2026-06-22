@@ -31,6 +31,7 @@ import { parseResponse } from "hono/client";
 import { Card, CardActions, CardBody } from "~/ui/card/card";
 import { InsertTaskDialog } from "./insert-task-dialog";
 import { InfoIcon } from "~/ui/icons/info-icon";
+import { StartAlbumPlaybackButton } from "./start-playback-button";
 
 type TaskDetailsDialogProps = {
   task: TaskResourceItem;
@@ -109,10 +110,12 @@ const DetailsDialog: Component<DetailsDialogProps> = (props) => {
           </InfoRowContainer>
           <Show when={open()}>
             <Loading>
-              <For each={props.artists}>
-                {(artist) => <ArtistAlbumsList name={artist.name} artistId={artist.id} />}
-              </For>
-              <RelatedArtistAlbumsList artistIds={props.artists.map((artist) => artist.id)} />
+              <div class="flex flex-col gap-4 pt-4">
+                <For each={props.artists}>
+                  {(artist) => <ArtistAlbumsList name={artist.name} artistId={artist.id} />}
+                </For>
+                <RelatedArtistAlbumsList artistIds={props.artists.map((artist) => artist.id)} />
+              </div>
             </Loading>
           </Show>
           <DialogActions>
@@ -169,8 +172,8 @@ type AlbumsListProps = {
 
 const AlbumsList: Component<AlbumsListProps> = (props) => {
   return (
-    <div>
-      <span>{props.name}</span>
+    <div class="flex flex-col gap-2">
+      <span class="text-lg font-semibold">{props.name}</span>
       <ul class="flex gap-2 max-w-full overflow-auto">
         <For each={props.albums}>{(album) => <AlbumsListItem album={album} />}</For>
       </ul>
@@ -190,6 +193,7 @@ const AlbumsListItem: Component<AlbumsListItemProps> = (props) => {
         <CardBody>
           <AlbumInformationSection album={props.album} />
           <CardActions>
+            <StartAlbumPlaybackButton album={props.album} />
             <InsertTaskDialog album={props.album} />
           </CardActions>
         </CardBody>
