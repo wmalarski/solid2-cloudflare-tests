@@ -28,13 +28,9 @@ export const artistsRoute = factory
     return context.json(response);
   })
   .get("/related", sValidator("query", artistIdsSchema), async (context) => {
-    console.log("[related]");
     const accessTokens = context.get("accessTokens");
-    console.log("[related]", JSON.stringify({ accessTokens }, null, 2));
     const artistIds = context.req.valid("query").artistIds;
-    console.log("[related]", JSON.stringify({ artistIds }, null, 2));
     const response = await getSpotifyRelatedAlbums({ artistIds, accessTokens });
-    console.log("[related]", JSON.stringify({ response }, null, 2));
     return context.json(response);
   })
   .get("/:artistId", sValidator("param", artistIdSchema), async (context) => {

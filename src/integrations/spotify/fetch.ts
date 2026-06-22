@@ -35,11 +35,6 @@ export const fetchSpotify = async <T = unknown>({
   const response = await fetch(url, { ...init, headers });
 
   if (!response.ok) {
-    console.error("[ERROR]", url, response, accessTokens, headers);
-
-    const text = await response.text();
-    console.log("[text]", text);
-
     throw new Error(response.statusText);
   }
 
@@ -50,8 +45,7 @@ export const fetchSpotify = async <T = unknown>({
   try {
     const json = await response.json();
     return json as T;
-  } catch (error) {
-    console.log("[error]", error, url);
+  } catch {
     throw new Error(response.statusText);
   }
 };
@@ -142,13 +136,9 @@ export const getSpotifyRelatedAlbums = async ({
       artistIds.map((artistId) => getSpotifyRelatedArtists({ accessTokens, artistId })),
     );
 
-    console.log(JSON.stringify({ relatedArtists }, null, 2));
-
     const allRelatedArtists = relatedArtists
       .flatMap((artists) => artists?.artists ?? [])
       .filter((artist) => !artistIds.includes(artist.id));
-
-    console.log(JSON.stringify({ allRelatedArtists }, null, 2));
 
     const relatedArtistMap = new Map(
       allRelatedArtists.map((artist) => [artist.id, artist] as const),
@@ -156,13 +146,9 @@ export const getSpotifyRelatedAlbums = async ({
 
     const relatedArtistIds = [...relatedArtistMap.keys()];
 
-    console.log(JSON.stringify({ relatedArtistIds }, null, 2));
-
     const artistsAlbums = await Promise.all(
       relatedArtistIds.map((artistId) => getSpotifyArtistAlbums({ accessTokens, artistId })),
     );
-
-    console.log(JSON.stringify({ artistsAlbums }, null, 2));
 
     return artistsAlbums.flatMap((albums, index) => {
       const artist = relatedArtistMap.get(relatedArtistIds[index]);
