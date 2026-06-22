@@ -169,3 +169,22 @@ export const getSpotifyCurrentlyPlayingTrack = ({
     accessTokens,
   });
 };
+
+type StartResumeCurrentPlayerArgs = WithAccessTokens<{
+  contextUri: string;
+}>;
+
+export const startResumeCurrentPlayer = ({
+  accessTokens,
+  contextUri,
+}: StartResumeCurrentPlayerArgs) => {
+  return fetchSpotify({
+    accessTokens,
+    path: "/me/player/play",
+    init: {
+      body: JSON.stringify({ context_uri: contextUri }),
+      headers: { "Content-Type": "application/json" },
+      method: "PUT",
+    },
+  });
+};

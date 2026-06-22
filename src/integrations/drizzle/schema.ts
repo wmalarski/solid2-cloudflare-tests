@@ -78,6 +78,7 @@ export const task = sqliteTable("task", {
   title: text("title").notNull(),
   spotifyId: text("spotify_id").unique("spotify_id_unique").notNull(),
   spotifyArtists: text("spotify_artists").notNull(),
+  spotifyUri: text("spotify_uri").default("").notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(
     () => /* @__PURE__ */ new Date(),
   ),

@@ -4,7 +4,6 @@ import { sValidator } from "@hono/standard-validator";
 import { accessTokenMiddleware, authorizedMiddleware } from "~/integrations/better-auth/middleware";
 import { getSpotifyAlbum } from "~/integrations/spotify/fetch";
 import { schema } from "~/integrations/drizzle/schema";
-import { STATUS_IN_PROGRESS, STATUS_REVIEWED } from "../constansts";
 import { and, eq } from "drizzle-orm";
 import { taskStatusSchema } from "../validation";
 
@@ -16,6 +15,7 @@ const insertTaskSchema = v.object({
   albumId: v.string(),
   note: v.optional(v.string()),
   rate: v.optional(v.number()),
+  status: taskStatusSchema,
 });
 
 const updateTaskSchema = v.object({
@@ -48,16 +48,17 @@ export const tasksRoute = factory
 
     const response = await db.insert(schema.task).values({
       id: taskId,
+      note: json.note,
+      preview: JSON.stringify(album.images),
+      rate: json.rate,
+      releaseDate: new Date(album.release_date),
       spotifyArtists: JSON.stringify(album.artists),
       spotifyId: album.id,
-      status: json.note && json.rate !== undefined ? STATUS_REVIEWED : STATUS_IN_PROGRESS,
+      spotifyUri: album.uri,
+      status: json.status,
       title: album.name,
-      userId: session.userId,
-      preview: JSON.stringify(album.images),
       url: album.external_urls.spotify,
-      releaseDate: new Date(album.release_date),
-      note: json.note,
-      rate: json.rate,
+      userId: session.userId,
     });
 
     return context.json(response.results);
