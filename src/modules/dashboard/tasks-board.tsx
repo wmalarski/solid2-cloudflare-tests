@@ -45,7 +45,7 @@ import { Skeleton } from "~/ui/skeleton/skeleton";
 
 export const TasksBoard: Component = () => {
   return (
-    <div class="grid grid-cols-3 p-4 max-w-full overflow-auto">
+    <div class="grid grid-cols-3 p-4 max-w-full overflow-auto items-stretch gap-2">
       <For each={BOOKMARK_STATUSES}>{(status) => <TasksColumn status={status} />}</For>
     </div>
   );
@@ -61,10 +61,9 @@ const TasksColumn: Component<TasksColumnProps> = (props) => {
   const statusTranslations = useStatusTranslations();
 
   return (
-    <div class="flex flex-col gap-4">
-      <h2>{statusTranslations(props.status)}</h2>
-      <pre>{JSON.stringify({ page: tasksContext.columns[props.status].page }, null, 2)}</pre>
-      <ul class="flex flex-col gap-4">
+    <div class="flex flex-col gap-4 border-4 border-base-300 p-4">
+      <h2 class="text-2xl font-semibold">{statusTranslations(props.status)}</h2>
+      <ul class="flex flex-row flex-wrap gap-4">
         <TaskColumnFragment tasks={tasksContext.columns[props.status].resource} />
         <SkeletonFragment />
       </ul>
