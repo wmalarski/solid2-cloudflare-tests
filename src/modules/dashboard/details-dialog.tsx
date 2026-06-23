@@ -4,6 +4,7 @@ import {
   createUniqueId,
   For,
   Loading,
+  Repeat,
   Show,
   type Component,
 } from "solid-js";
@@ -32,6 +33,7 @@ import { Card, CardActions, CardBody } from "~/ui/card/card";
 import { InsertTaskDialog } from "./insert-task-dialog";
 import { InfoIcon } from "~/ui/icons/info-icon";
 import { StartAlbumPlaybackButton } from "./start-playback-button";
+import { Skeleton } from "~/ui/skeleton/skeleton";
 
 type TaskDetailsDialogProps = {
   task: TaskResourceItem;
@@ -109,14 +111,14 @@ const DetailsDialog: Component<DetailsDialogProps> = (props) => {
             />
           </InfoRowContainer>
           <Show when={open()}>
-            <Loading>
-              <div class="flex flex-col gap-4 pt-4">
+            <div class="flex flex-col gap-4 pt-4">
+              <Loading fallback={<SkeletonList />}>
                 <For each={props.artists}>
                   {(artist) => <ArtistAlbumsList name={artist.name} artistId={artist.id} />}
                 </For>
                 <RelatedArtistAlbumsList artistIds={props.artists.map((artist) => artist.id)} />
-              </div>
-            </Loading>
+              </Loading>
+            </div>
           </Show>
           <DialogActions>
             <DialogClose />
@@ -195,6 +197,36 @@ const AlbumsListItem: Component<AlbumsListItemProps> = (props) => {
           <CardActions>
             <StartAlbumPlaybackButton album={props.album} />
             <InsertTaskDialog album={props.album} />
+          </CardActions>
+        </CardBody>
+      </Card>
+    </li>
+  );
+};
+
+const SkeletonList: Component = () => {
+  return (
+    <div class="flex flex-col gap-2">
+      <Skeleton class="h-7" />
+      <ul class="flex gap-2 max-w-full overflow-auto">
+        <Repeat count={4}>{() => <SkeletonListItem />}</Repeat>
+      </ul>
+    </div>
+  );
+};
+
+const SkeletonListItem: Component = () => {
+  return (
+    <li class="h-auto min-w-64">
+      <Card>
+        <Skeleton class="h-64" />
+        <CardBody>
+          <Skeleton class="h-7" />
+          <Skeleton class="h-5" />
+          <Skeleton class="h-5" />
+          <CardActions>
+            <Skeleton class="h-8 w-19" />
+            <Skeleton class="h-8 w-19" />
           </CardActions>
         </CardBody>
       </Card>
