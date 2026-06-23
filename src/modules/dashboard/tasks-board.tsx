@@ -1,4 +1,12 @@
-import { action, createSignal, createUniqueId, For, refresh, type Component } from "solid-js";
+import {
+  action,
+  createSignal,
+  createUniqueId,
+  For,
+  refresh,
+  Repeat,
+  type Component,
+} from "solid-js";
 import type { TaskStatus } from "./validation";
 import { useTasksContext, type TaskResourceItem } from "./data-contexts/tasks-context";
 import { BOOKMARK_STATUSES } from "./constansts";
@@ -33,6 +41,7 @@ import { useStatusTranslations } from "./use-status-translations";
 import { InfoRowContainer, InfoRowItem } from "~/ui/info-row/info-row";
 import { TaskDetailsDialog } from "./details-dialog";
 import { StartTaskPlaybackButton } from "./start-playback-button";
+import { Skeleton } from "~/ui/skeleton/skeleton";
 
 export const TasksBoard: Component = () => {
   return (
@@ -57,16 +66,17 @@ const TasksColumn: Component<TasksColumnProps> = (props) => {
       <pre>{JSON.stringify({ page: tasksContext.columns[props.status].page }, null, 2)}</pre>
       <ul class="flex flex-col gap-4">
         <TaskColumnFragment tasks={tasksContext.columns[props.status].resource} />
+        <SkeletonFragment />
       </ul>
     </div>
   );
 };
 
-type TaskColumnFragmentrops = {
+type TaskColumnFragmentProps = {
   tasks: readonly TaskResourceItem[];
 };
 
-const TaskColumnFragment: Component<TaskColumnFragmentrops> = (props) => {
+const TaskColumnFragment: Component<TaskColumnFragmentProps> = (props) => {
   return <For each={props.tasks}>{(task) => <TaskColumnItem task={task} />}</For>;
 };
 
@@ -251,5 +261,30 @@ const UpdateTaskForm: Component<UpdateTaskFormProps> = (props) => {
     <form onSubmit={onSubmit} id={props.formId}>
       <TaskFields initialValues={props.task} issues={issues()} />
     </form>
+  );
+};
+
+const SkeletonFragment: Component = () => {
+  return <Repeat count={4}>{() => <SkeletonItem />}</Repeat>;
+};
+
+const SkeletonItem: Component = () => {
+  return (
+    <li class="w-75">
+      <Card>
+        <Skeleton class="h-75" />
+        <CardBody>
+          <Skeleton class="h-7" />
+          <Skeleton class="h-5" />
+          <Skeleton class="h-5 pb-5" />
+          <CardActions class="pt-5">
+            <Skeleton class="h-8 w-19" />
+            <Skeleton class="h-8 w-21" />
+            <Skeleton class="h-8 w-21" />
+            <Skeleton class="h-8 w-19" />
+          </CardActions>
+        </CardBody>
+      </Card>
+    </li>
   );
 };
