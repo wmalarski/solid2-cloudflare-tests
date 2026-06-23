@@ -176,7 +176,7 @@ const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
 
   return (
     <>
-      <DialogTrigger color="primary" size="sm" for={dialogId}>
+      <DialogTrigger color="secondary" size="sm" for={dialogId}>
         <PencilIcon class="size-4" />
         {t("common.update")}
       </DialogTrigger>

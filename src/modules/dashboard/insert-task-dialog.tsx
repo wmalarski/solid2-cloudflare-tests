@@ -38,7 +38,7 @@ export const InsertTaskDialog: Component<InsertTaskDialogProps> = (props) => {
 
   return (
     <>
-      <DialogTrigger color="primary" size="sm" for={dialogId}>
+      <DialogTrigger color="secondary" size="sm" for={dialogId}>
         <PlusIcon class="size-4" />
         {t("currentlyPlaying.addTask.trigger")}
       </DialogTrigger>

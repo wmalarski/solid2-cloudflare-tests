@@ -6,6 +6,7 @@ import { Button } from "~/ui/button/button";
 import { useCurrentlyPlayingContext } from "./data-contexts/currently-playing-context";
 import type { TaskResourceItem } from "./data-contexts/tasks-context";
 import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
+import { PlayIcon } from "~/ui/icons/play-icon";
 
 type StartTaskPlaybackButtonProps = {
   task: TaskResourceItem;
@@ -52,6 +53,7 @@ const StartPlaybackButton: Component<StartPlaybackButtonProps> = (props) => {
   return (
     <form onSubmit={onSubmit}>
       <Button size="sm" color="primary" isLoading={isLoading()} disabled={isLoading()}>
+        <PlayIcon class="size-4" />
         {t("task.play")}
       </Button>
     </form>
