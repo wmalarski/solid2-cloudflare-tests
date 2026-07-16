@@ -51,6 +51,7 @@ const createTasksContext = () => {
         updatedAt: null,
         url: album.external_urls.spotify,
         userId: "self",
+        spotifyUri: album.uri,
       });
     });
   };

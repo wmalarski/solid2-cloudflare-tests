@@ -3,6 +3,7 @@ import {
   createSignal,
   createUniqueId,
   For,
+  Loading,
   refresh,
   Repeat,
   type Component,
@@ -45,7 +46,7 @@ import { Skeleton } from "~/ui/skeleton/skeleton";
 
 export const TasksBoard: Component = () => {
   return (
-    <div class="grid grid-cols-3 p-4 max-w-full overflow-auto items-stretch gap-2">
+    <div class="grid grid-cols-[auto_auto_auto] p-4 max-w-full overflow-auto items-stretch gap-2">
       <For each={BOOKMARK_STATUSES}>{(status) => <TasksColumn status={status} />}</For>
     </div>
   );
@@ -61,11 +62,12 @@ const TasksColumn: Component<TasksColumnProps> = (props) => {
   const statusTranslations = useStatusTranslations();
 
   return (
-    <div class="flex flex-col gap-4 border-4 border-base-300 p-4">
-      <h2 class="text-2xl font-semibold">{statusTranslations(props.status)}</h2>
+    <div class="flex flex-col gap-4 not-last:border-r-2 border-base-300 p-4">
+      <h2 class="text-md uppercase text-center">{statusTranslations(props.status)}</h2>
       <ul class="flex flex-row flex-wrap gap-4">
-        <TaskColumnFragment tasks={tasksContext.columns[props.status].resource} />
-        <SkeletonFragment />
+        <Loading fallback={<SkeletonFragment />}>
+          <TaskColumnFragment tasks={tasksContext.columns[props.status].resource} />
+        </Loading>
       </ul>
     </div>
   );
@@ -90,8 +92,8 @@ const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
   const dateFormatter = createDateFormatter();
 
   return (
-    <li class="w-75">
-      <Card>
+    <li class="min-w-xl w-full">
+      <Card side>
         <AlbumImage images={parseImages(props.task.preview)} size={300} />
         <CardBody>
           <CardTitle component="span">{props.task.title}</CardTitle>
@@ -269,9 +271,9 @@ const SkeletonFragment: Component = () => {
 
 const SkeletonItem: Component = () => {
   return (
-    <li class="w-75">
-      <Card>
-        <Skeleton class="h-75" />
+    <li class="min-w-xl w-full">
+      <Card side>
+        <Skeleton class="h-75 w-75 min-w-72" />
         <CardBody>
           <Skeleton class="h-7" />
           <Skeleton class="h-5" />
