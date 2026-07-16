@@ -15,33 +15,33 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@hono/standard-validator": "^0.2.2",
-    "@solid-primitives/i18n": "^2.2.1",
-    "@solidjs/web": "2.0.0-beta.14",
+    "@hono/standard-validator": "^0.3.0",
+    "@solid-primitives/i18n": "3.0.0-next.2",
+    "@solidjs/web": "2.0.0-beta.19",
     "@spotify/web-api-ts-sdk": "^1.2.0",
-    "@tailwindcss/vite": "^4.3.1",
-    "better-auth": "^1.6.18",
+    "@tailwindcss/vite": "^4.3.3",
+    "better-auth": "^1.6.23",
     "decode-formdata": "^0.9.0",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
-    "hono": "^4.12.25",
-    "solid-js": "2.0.0-beta.14",
+    "hono": "^4.12.30",
+    "solid-js": "2.0.0-beta.19",
     "tailwind-merge": "3.6.0",
     "tailwind-variants": "^3.2.2",
-    "tailwindcss": "^4.3.1",
-    "valibot": "^1.4.1"
+    "tailwindcss": "^4.3.3",
+    "valibot": "^1.4.2"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.40.2",
-    "@cloudflare/workers-types": "^4.20260613.1",
-    "@types/node": "^25.9.3",
-    "daisyui": "^5.5.23",
+    "@cloudflare/workers-types": "^4.20260702.1",
+    "@types/node": "^26.1.1",
+    "daisyui": "^5.6.18",
     "drizzle-kit": "^0.31.10",
-    "knip": "^6.16.1",
+    "knip": "^6.27.0",
     "typescript": "~6.0.3",
     "vite": "catalog:",
-    "vite-plugin-solid": "^3.0.0-next.5",
+    "vite-plugin-solid": "^3.0.0-next.11",
     "vite-plus": "catalog:"
   },
-  "packageManager": "pnpm@11.5.3"
+  "packageManager": "pnpm@11.13.1"
 }

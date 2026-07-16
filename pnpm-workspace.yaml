@@ -17,6 +17,35 @@ minimumReleaseAgeExclude:
   - miniflare@4.20260611.0
   - workerd@1.20260611.1
   - wrangler@4.100.0
+  - "@dom-expressions/babel-plugin-jsx@0.50.0-next.22"
+  - "@dom-expressions/jsx-compiler-darwin-arm64@0.50.0-next.22"
+  - "@dom-expressions/jsx-compiler-darwin-x64@0.50.0-next.22"
+  - "@dom-expressions/jsx-compiler-linux-arm64-gnu@0.50.0-next.22"
+  - "@dom-expressions/jsx-compiler-linux-x64-gnu@0.50.0-next.22"
+  - "@dom-expressions/jsx-compiler-wasm32-wasi@0.50.0-next.22"
+  - "@dom-expressions/jsx-compiler-win32-x64-msvc@0.50.0-next.22"
+  - "@dom-expressions/jsx-compiler@0.50.0-next.22"
+  - "@solidjs/signals@2.0.0-beta.19"
+  - "@solidjs/web@2.0.0-beta.19"
+  - "@tailwindcss/node@4.3.3"
+  - "@tailwindcss/oxide-android-arm64@4.3.3"
+  - "@tailwindcss/oxide-darwin-arm64@4.3.3"
+  - "@tailwindcss/oxide-darwin-x64@4.3.3"
+  - "@tailwindcss/oxide-freebsd-x64@4.3.3"
+  - "@tailwindcss/oxide-linux-arm-gnueabihf@4.3.3"
+  - "@tailwindcss/oxide-linux-arm64-gnu@4.3.3"
+  - "@tailwindcss/oxide-linux-arm64-musl@4.3.3"
+  - "@tailwindcss/oxide-linux-x64-gnu@4.3.3"
+  - "@tailwindcss/oxide-linux-x64-musl@4.3.3"
+  - "@tailwindcss/oxide-wasm32-wasi@4.3.3"
+  - "@tailwindcss/oxide-win32-arm64-msvc@4.3.3"
+  - "@tailwindcss/oxide-win32-x64-msvc@4.3.3"
+  - "@tailwindcss/oxide@4.3.3"
+  - "@tailwindcss/vite@4.3.3"
+  - babel-preset-solid@2.0.0-beta.19
+  - solid-js@2.0.0-beta.19
+  - tailwindcss@4.3.3
+  - vite-plugin-solid@3.0.0-next.11
 overrides:
   vite: "catalog:"
   vitest: "catalog:"
