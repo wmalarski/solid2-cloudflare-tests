@@ -78,7 +78,11 @@ type TaskColumnFragmentProps = {
 };
 
 const TaskColumnFragment: Component<TaskColumnFragmentProps> = (props) => {
-  return <For each={props.tasks}>{(task) => <TaskColumnItem task={task} />}</For>;
+  return (
+    <For each={props.tasks} keyed={(task) => task.id}>
+      {(task) => <TaskColumnItem task={task()} />}
+    </For>
+  );
 };
 
 type TaskColumnItemProps = {
@@ -195,7 +199,7 @@ const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
         <DialogBox>
           <DialogTitle>{t("task.update.title")}</DialogTitle>
           <DialogDescription>{t("task.update.description")}</DialogDescription>
-          <UpdateTaskForm onSuccess={onSuccess} task={props.task} formId={formId} />
+          <UpdateTaskForm onSubmitStart={onSuccess} task={props.task} formId={formId} />
           <DialogActions>
             <DialogClose />
             <Button color="primary" form={formId} type="submit">
@@ -212,7 +216,7 @@ const UpdateTaskDialog: Component<UpdateTaskDialogProps> = (props) => {
 type UpdateTaskFormProps = {
   formId: string;
   task: TaskResourceItem;
-  onSuccess: () => void;
+  onSubmitStart: () => void;
 };
 
 const UpdateTaskForm: Component<UpdateTaskFormProps> = (props) => {
@@ -237,6 +241,7 @@ const UpdateTaskForm: Component<UpdateTaskFormProps> = (props) => {
 
     const status = props.task.status as TaskStatus;
     tasksContext.updateTask(status, { ...parsed.output, taskId: props.task.id });
+    props.onSubmitStart();
 
     yield parseResponse(
       honoClient.api.tasks[":taskId"].$put({
@@ -244,8 +249,6 @@ const UpdateTaskForm: Component<UpdateTaskFormProps> = (props) => {
         json: parsed.output,
       }),
     );
-
-    props.onSuccess();
 
     const tasksColumn = tasksContext.columns[status];
     refresh(tasksColumn.resource);

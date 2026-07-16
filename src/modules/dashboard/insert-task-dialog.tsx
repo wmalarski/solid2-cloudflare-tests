@@ -87,7 +87,6 @@ const InsertTaskForm: Component<InsertTaskFormProps> = (props) => {
     }
 
     tasksContext.insertAlbumAsTask(props.album);
-
     props.onSubmitStart();
 
     yield parseResponse(

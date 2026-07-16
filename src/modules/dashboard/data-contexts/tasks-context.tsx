@@ -36,12 +36,12 @@ const createTasksContext = () => {
 
   const insertAlbumAsTask = (album: SimplifiedAlbum) => {
     columns[STATUS_IN_PROGRESS].setResource((resource) => {
-      resource.splice(0, 0, {
+      resource.push({
         id: crypto.randomUUID(),
         createdAt: null,
         doneAt: null,
         note: null,
-        preview: null,
+        preview: JSON.stringify(album.images),
         rate: null,
         releaseDate: album.release_date,
         spotifyArtists: JSON.stringify(album.artists),
