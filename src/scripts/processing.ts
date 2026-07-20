@@ -9,41 +9,27 @@ const process = async () => {
     .map((line) => {
       const values = line.slice(line.indexOf("VALUES") + 7, -2).split(",");
 
-      const [createdAt, doneAt, id, note, preview, rate, text, ...rest] = values;
-      const [updatedAt, url, userId, status] = rest.splice(-4);
+      const [_createdAt, doneAt, id, note, _preview, rate, text, ...rest] = values;
+      const [_updatedAt, _url, _userId, status] = rest.splice(-4);
       const title = rest.join(",");
 
       return {
         task: {
           doneAt: doneAt !== "NULL" ? JSON.parse(doneAt) : undefined,
           id: crypto.randomUUID(),
-          note: note !== "NULL" ? note : undefined,
+          note: note !== "NULL" ? (note ?? "") : "",
           rate: rate !== "NULL" ? JSON.parse(rate) : undefined,
+          status: status.replaceAll("'", ""),
         },
-        createdAt,
-        doneAt,
-        id,
-        note,
-        preview,
-        rate,
         text,
-        title,
-        updatedAt,
-        url,
-        userId,
-        status,
+        id: Number(id.slice(1, -1)),
+        title: title.slice(1, -1),
       };
-    });
-  console.log("PROCESS", lines);
+    })
+    .filter((entry) => entry.text === "NULL")
+    .map((line) => ({ task: line.task, id: line.id, title: line.title }));
 
-  const groups = lines
-    .map((line) => line.status)
-    .reduce((previous, current) => {
-      previous.set(current, (previous.get(current) ?? 0) + 1);
-      return previous;
-    }, new Map<string, number>());
-
-  console.log(groups);
+  console.log(JSON.stringify(lines, null, 2));
 };
 
 void process();
