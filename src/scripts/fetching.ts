@@ -10,11 +10,10 @@ const fetchToken = async () => {
   const token = Buffer.from(tokenValue).toString("base64");
   const url = "https://accounts.spotify.com/api/token";
 
-  const formData = new FormData();
-  formData.set("grant_type", "client_credentials");
+  const searchParams = new URLSearchParams({ grant_type: "client_credentials" });
 
   const response = await fetch(url, {
-    body: formData,
+    body: searchParams,
     method: "POST",
     headers: {
       Authorization: "Basic " + token,
@@ -43,12 +42,10 @@ const wait = (time: number) => {
 const main = async () => {
   const token = await fetchToken();
 
-  console.log({ token });
-
   const file = await readFile("src/scripts/data.json", { encoding: "utf8" });
   const data = JSON.parse(file);
 
-  for await (const element of data.slice(0, 0)) {
+  for await (const element of data.slice(0, 2)) {
     const result = await fetchAlbum(element.title, (token as any).access_token);
     await writeFile(`src/scripts/data/${element.id}.json`, JSON.stringify(result));
     await wait(5_000);
