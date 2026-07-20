@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile, access, constants } from "node:fs/promises";
 import { config } from "dotenv";
 
 config();
@@ -39,17 +39,31 @@ const wait = (time: number) => {
   return new Promise((resolve) => setTimeout(() => resolve(undefined), time));
 };
 
+const checkFile = async (filepath: string) => {
+  try {
+    await access(filepath, constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 const main = async () => {
   const token = await fetchToken();
 
   const file = await readFile("src/scripts/data.json", { encoding: "utf8" });
   const data = JSON.parse(file);
 
-  for await (const element of data.slice(0, 2)) {
-    const result = await fetchAlbum(element.title, (token as any).access_token);
-    await writeFile(`src/scripts/data/${element.id}.json`, JSON.stringify(result));
-    await wait(5_000);
-    console.log(result);
+  for await (const element of data) {
+    const filepath = `src/scripts/data/${element.id}.json`;
+    const exists = await checkFile(filepath);
+
+    if (!exists) {
+      const result = await fetchAlbum(element.title, (token as any).access_token);
+      await writeFile(filepath, JSON.stringify(result));
+      await wait(1_000);
+      console.log(filepath, result);
+    }
   }
 };
 
