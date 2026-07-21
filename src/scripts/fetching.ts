@@ -26,7 +26,7 @@ const fetchToken = async () => {
   return json;
 };
 const fetchAlbum = async (title: string, accessToken: string) => {
-  const params = new URLSearchParams({ q: title, type: "album", limit: "1" });
+  const params = new URLSearchParams({ q: title, type: "album", limit: "10" });
   const url = `https://api.spotify.com/v1/search?${params}`;
   const headers = new Headers();
   headers.set("Authorization", `Bearer ${accessToken}`);
@@ -61,7 +61,7 @@ const main = async () => {
     if (!exists) {
       const result = await fetchAlbum(element.title, (token as any).access_token);
       await writeFile(filepath, JSON.stringify(result));
-      await wait(1_000);
+      await wait(500);
       console.log(filepath, result);
     }
   }
