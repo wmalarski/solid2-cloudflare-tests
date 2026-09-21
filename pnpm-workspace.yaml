@@ -3,20 +3,19 @@ allowBuilds:
   sharp: true
   workerd: true
 catalog:
-  vite: npm:@voidzero-dev/vite-plus-core@latest
-  vitest: npm:@voidzero-dev/vite-plus-test@latest
-  vite-plus: latest
+  vite: npm:@voidzero-dev/vite-plus-core@0.3.1
+  vite-plus: 0.3.1
 minimumReleaseAgeExclude:
-  - "@cloudflare/vite-plugin@1.40.2"
-  - "@cloudflare/workerd-darwin-64@1.20260611.1"
-  - "@cloudflare/workerd-darwin-arm64@1.20260611.1"
-  - "@cloudflare/workerd-linux-64@1.20260611.1"
-  - "@cloudflare/workerd-linux-arm64@1.20260611.1"
-  - "@cloudflare/workerd-windows-64@1.20260611.1"
+  - "@cloudflare/vite-plugin@1.40.2 || 1.54.8 || 1.57.1"
+  - "@cloudflare/workerd-darwin-64@1.20260611.1 || 1.20260921.1"
+  - "@cloudflare/workerd-darwin-arm64@1.20260611.1 || 1.20260921.1"
+  - "@cloudflare/workerd-linux-64@1.20260611.1 || 1.20260921.1"
+  - "@cloudflare/workerd-linux-arm64@1.20260611.1 || 1.20260921.1"
+  - "@cloudflare/workerd-windows-64@1.20260611.1 || 1.20260921.1"
   - "@types/node@25.9.3"
-  - miniflare@4.20260611.0
-  - workerd@1.20260611.1
-  - wrangler@4.100.0
+  - miniflare@4.20260611.0 || 5.20260911.0-alpha || 5.20260921.0-alpha
+  - workerd@1.20260611.1 || 1.20260921.1
+  - wrangler@4.100.0 || 4.131.1 || 4.136.1
   - "@dom-expressions/babel-plugin-jsx@0.50.0-next.22"
   - "@dom-expressions/jsx-compiler-darwin-arm64@0.50.0-next.22"
   - "@dom-expressions/jsx-compiler-darwin-x64@0.50.0-next.22"
@@ -25,8 +24,8 @@ minimumReleaseAgeExclude:
   - "@dom-expressions/jsx-compiler-wasm32-wasi@0.50.0-next.22"
   - "@dom-expressions/jsx-compiler-win32-x64-msvc@0.50.0-next.22"
   - "@dom-expressions/jsx-compiler@0.50.0-next.22"
-  - "@solidjs/signals@2.0.0-beta.19"
-  - "@solidjs/web@2.0.0-beta.19"
+  - "@solidjs/signals@2.0.0-beta.19 || 2.0.0-rc.8"
+  - "@solidjs/web@2.0.0-beta.19 || 2.0.0-rc.8"
   - "@tailwindcss/node@4.3.3"
   - "@tailwindcss/oxide-android-arm64@4.3.3"
   - "@tailwindcss/oxide-darwin-arm64@4.3.3"
@@ -43,16 +42,19 @@ minimumReleaseAgeExclude:
   - "@tailwindcss/oxide@4.3.3"
   - "@tailwindcss/vite@4.3.3"
   - babel-preset-solid@2.0.0-beta.19
-  - solid-js@2.0.0-beta.19
+  - solid-js@2.0.0-beta.19 || 2.0.0-rc.8
   - tailwindcss@4.3.3
   - vite-plugin-solid@3.0.0-next.11
+  - daisyui@5.7.37
+  - "@cloudflare/unenv-preset@2.16.2"
+  - "@cloudflare/workers-types@5.20260921.1"
+  - dotenv@18.0.2
+  - drizzle-kit@0.31.11
+  - drizzle-orm@0.45.3
 overrides:
-  vite: "catalog:"
-  vitest: "catalog:"
+  vite@*: "catalog:"
 peerDependencyRules:
   allowAny:
     - vite
-    - vitest
   allowedVersions:
     vite: "*"
-    vitest: "*"
