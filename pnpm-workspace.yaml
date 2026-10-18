@@ -47,10 +47,11 @@ minimumReleaseAgeExclude:
   - vite-plugin-solid@3.0.0-next.11
   - daisyui@5.7.37
   - "@cloudflare/unenv-preset@2.16.2"
-  - "@cloudflare/workers-types@5.20260921.1"
+  - "@cloudflare/workers-types@5.20260921.1 || 5.20261018.1"
   - dotenv@18.0.2
   - drizzle-kit@0.31.11
   - drizzle-orm@0.45.3
+  - knip@6.42.0
 overrides:
   vite@*: "catalog:"
 peerDependencyRules:
