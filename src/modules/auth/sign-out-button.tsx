@@ -15,7 +15,7 @@ export const SignOutButton: Component = () => {
 
     yield authClient.signOut();
 
-    refresh(authContext);
+    yield refresh(authContext);
   });
 
   return (

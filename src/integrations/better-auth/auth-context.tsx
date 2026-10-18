@@ -2,7 +2,7 @@ import { createContext, createMemo, useContext, type Component, type ParentProps
 import { authClient } from "./auth-client";
 
 export const createSessionResource = () => {
-  return createMemo(() => authClient.getAccessToken({ providerId: "spotify" }));
+  return createMemo(() => authClient.getAccessToken({ useAccountCookie: true }));
 };
 
 type AuthContextValue = ReturnType<typeof createSessionResource>;

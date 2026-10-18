@@ -45,7 +45,7 @@ const StartPlaybackButton: Component<StartPlaybackButtonProps> = (props) => {
       json: { contextUri: props.contextUri },
     });
 
-    refresh(currentlyPlayingContext);
+    yield refresh(currentlyPlayingContext);
   });
 
   const isLoading = createMemo(() => isPending(currentlyPlayingContext));

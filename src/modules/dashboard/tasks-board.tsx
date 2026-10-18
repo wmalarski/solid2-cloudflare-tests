@@ -153,7 +153,7 @@ const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
     );
 
     const tasksColumn = tasksContext.columns[status];
-    refresh(tasksColumn.resource);
+    yield refresh(tasksColumn.resource);
     tasksColumn.setPage(0);
   });
 
@@ -251,12 +251,12 @@ const UpdateTaskForm: Component<UpdateTaskFormProps> = (props) => {
     );
 
     const tasksColumn = tasksContext.columns[status];
-    refresh(tasksColumn.resource);
+    yield refresh(tasksColumn.resource);
     tasksColumn.setPage(0);
 
     if (status !== parsed.output.status) {
       const tasksColumn = tasksContext.columns[parsed.output.status];
-      refresh(tasksColumn.resource);
+      yield refresh(tasksColumn.resource);
       tasksColumn.setPage(0);
     }
   });

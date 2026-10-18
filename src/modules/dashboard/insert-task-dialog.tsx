@@ -97,7 +97,7 @@ const InsertTaskForm: Component<InsertTaskFormProps> = (props) => {
 
     const status = parsed.output.status;
     const tasksColumn = tasksContext.columns[status];
-    refresh(tasksColumn.resource);
+    yield refresh(tasksColumn.resource);
     tasksColumn.setPage(0);
   });
 
