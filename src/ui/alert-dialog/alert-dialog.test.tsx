@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vite-plus/test";
 import { page } from "vite-plus/test/browser";
-import { expectScreenshot, renderUi } from "../test-utils";
+import { renderUi } from "~/testing/render";
+import { expectScreenshot } from "~/testing/screenshot";
 import { AlertDialog } from "./alert-dialog";
 
 describe("AlertDialog", () => {

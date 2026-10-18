@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vite-plus/test";
 import { page } from "vite-plus/test/browser";
 import { Button } from "../button/button";
-import { expectScreenshot, renderUi } from "../test-utils";
+import { renderUi } from "~/testing/render";
+import { expectScreenshot } from "~/testing/screenshot";
 import {
   closeDialog,
   Dialog,

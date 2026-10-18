@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vite-plus/test";
-import { renderUi } from "../test-utils";
+import { renderUi } from "~/testing/render";
 import { Loading } from "./loading";
 
 /**

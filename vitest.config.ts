@@ -1,19 +1,30 @@
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import solid from "@solidjs/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
+import { msw } from "msw/vite";
 import { fileURLToPath } from "node:url";
 import { playwright } from "vite-plus/test/browser-playwright";
 import { defineConfig } from "vite-plus/test/config";
 
 const srcDir = fileURLToPath(new URL("./src", import.meta.url));
 
+/** Shared browser-mode settings for the DOM test projects. */
+const browser = () => ({
+  enabled: true,
+  headless: true,
+  provider: playwright(),
+  instances: [{ browser: "chromium" as const }],
+});
+
 /**
  * Browser-mode tests.
  *
  * Kept in `vitest.config.ts` (not `vite.config.ts`) so the app's Cloudflare
- * dev/build config stays untouched. Two projects run here:
+ * dev/build config stays untouched. Three projects run here:
  *
  * - `ui`: unit + screenshot tests for the `src/ui` component library.
+ * - `integration`: tests for composed UI (`src/modules`, `src/integrations`)
+ *   that talk to the Hono API through MSW.
  * - `storybook`: Storybook story tests (see `pnpm test-storybook`).
  *
  * The Playwright Chromium browser must be installed once
@@ -25,7 +36,7 @@ export default defineConfig({
     projects: [
       {
         extends: true,
-        plugins: [solid()],
+        plugins: [solid(), msw({ mode: "worker-only" })],
         resolve: {
           // Mirror the app-wide `~/*` -> `./src/*` alias from `tsconfig.app.json`.
           alias: { "~": srcDir },
@@ -36,13 +47,22 @@ export default defineConfig({
         test: {
           name: "ui",
           include: ["src/ui/**/*.test.{ts,tsx}"],
-          setupFiles: ["./src/ui/test-setup.ts"],
-          browser: {
-            enabled: true,
-            headless: true,
-            provider: playwright(),
-            instances: [{ browser: "chromium" }],
-          },
+          setupFiles: ["./src/testing/test-setup.ts"],
+          browser: browser(),
+        },
+      },
+      {
+        extends: true,
+        plugins: [solid(), msw({ mode: "worker-only" })],
+        resolve: {
+          alias: { "~": srcDir },
+          dedupe: ["solid-js", "@solidjs/web"],
+        },
+        test: {
+          name: "integration",
+          include: ["src/modules/**/*.test.{ts,tsx}", "src/integrations/**/*.test.{ts,tsx}"],
+          setupFiles: ["./src/testing/test-setup.ts"],
+          browser: browser(),
         },
       },
       {
@@ -50,12 +70,7 @@ export default defineConfig({
         plugins: [storybookTest({ configDir: ".storybook" })],
         test: {
           name: "storybook",
-          browser: {
-            enabled: true,
-            headless: true,
-            provider: playwright(),
-            instances: [{ browser: "chromium" }],
-          },
+          browser: browser(),
         },
       },
     ],

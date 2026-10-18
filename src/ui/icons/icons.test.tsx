@@ -1,6 +1,7 @@
 import { Dynamic } from "@solidjs/web";
 import { describe, expect, it } from "vite-plus/test";
-import { expectScreenshot, renderUi } from "../test-utils";
+import { renderUi } from "~/testing/render";
+import { expectScreenshot } from "~/testing/screenshot";
 import { AlertCircleIcon } from "./alert-circle-icon";
 import { ChartNetworkIcon } from "./chart-network-icon";
 import { CheckCircleIcon } from "./check-circle-icon";

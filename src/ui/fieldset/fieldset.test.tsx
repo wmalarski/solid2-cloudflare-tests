@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vite-plus/test";
 import { Input } from "../input/input";
-import { expectScreenshot, renderUi } from "../test-utils";
+import { renderUi } from "~/testing/render";
+import { expectScreenshot } from "~/testing/screenshot";
 import { Fieldset, FieldsetLabel, FieldsetLegend } from "./fieldset";
 
 describe("Fieldset", () => {

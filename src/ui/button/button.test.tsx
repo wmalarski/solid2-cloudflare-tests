@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vite-plus/test";
-import { expectScreenshot, renderUi } from "../test-utils";
+import { renderUi } from "~/testing/render";
+import { expectScreenshot } from "~/testing/screenshot";
 import { Button } from "./button";
 
 describe("Button", () => {

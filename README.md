@@ -33,6 +33,7 @@ pnpm storybook        # dev server on http://localhost:6006
 pnpm build-storybook  # static build into ./storybook-static
 pnpm test             # run every browser-mode test project
 pnpm test-ui          # run the src/ui unit + screenshot tests
+pnpm test-integration # run the composed-UI tests against MSW-mocked Hono API
 pnpm test-storybook   # run story tests (Vitest browser mode + Playwright)
 ```
 
@@ -70,10 +71,54 @@ To (re)generate reference screenshots after an intentional visual change:
 pnpm test-ui -- -u
 ```
 
-Test files are wired into `vitest.config.ts` as the `ui` project, kept separate
-from the `storybook` project and from the app's Cloudflare `vite.config.ts`.
+### Integration tests (MSW)
 
-Story tests need a Playwright browser once: `pnpm exec playwright install chromium`.
+Composed UI that talks to the Hono API (`src/modules`, `src/integrations`) is
+covered by the separate `integration` Vitest project. Requests are intercepted
+with [Mock Service Worker](https://mswjs.io), so no Worker, D1 or Spotify
+access is needed.
+
+```bash
+pnpm test-integration
+```
+
+Shared infrastructure lives in `src/testing/`:
+
+- `msw/handlers.ts` — happy-path handlers for every `/api/*` route (tasks,
+  albums, artists, player, better-auth).
+- `msw/db.ts` — a tiny in-memory stand-in for D1, reset between tests, so
+  mutations are visible to the `GET` the UI makes when it refreshes.
+- `msw/fixtures.ts` — Spotify album/artist/track/task factories. Cover art is
+  inline `data:` SVG, so fixtures are offline and screenshots deterministic.
+- `msw/browser.ts` / `msw/setup.ts` — the `setupWorker(...)` instance and the
+  Vitest life-cycle (start once per file, reset handlers + DB after each test).
+- `render.tsx` — `renderWithProviders`, which wraps a component in the i18n and
+  Hono client providers.
+
+The `mockServiceWorker.js` script is served by the `msw/vite` plugin configured
+in `vitest.config.ts` (`mode: "worker-only"`), so there is no `public/` copy to
+maintain.
+
+A test seeds data, renders, and can override handlers per case:
+
+```tsx
+import { renderWithProviders } from "~/testing";
+import { HttpResponse, createTask, http, seedMockDb, worker } from "~/testing/msw";
+
+seedMockDb({ tasks: [createTask({ title: "Nude" })] });
+renderWithProviders(() => <TasksBoard />);
+await expect.element(page.getByText("Nude").first()).toBeVisible();
+
+// Prepend an override for just this test.
+worker.use(http.get("/api/tasks", () => HttpResponse.json([])));
+```
+
+The same worker is wired into the `ui` project, so unit tests can opt into API
+mocking when needed. See `src/modules/dashboard/tasks-board.test.tsx` for a
+worked example.
+
+All browser-mode projects need a Playwright browser once:
+`pnpm exec playwright install chromium`.
 
 ## Deployment
 
