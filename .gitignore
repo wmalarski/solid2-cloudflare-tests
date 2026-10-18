@@ -17,6 +17,9 @@ dist-ssr
 storybook-static
 *storybook.log
 
+# Vitest browser screenshot diffs/attachments from failed runs
+.vitest-attachments
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

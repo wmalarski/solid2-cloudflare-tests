@@ -12,6 +12,8 @@
     "prepare": "vp config",
     "preview": "vp preview",
     "storybook": "storybook dev -p 6006",
+    "test": "vitest run",
+    "test-ui": "vitest run --project ui",
     "test-storybook": "vitest run --project storybook",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
