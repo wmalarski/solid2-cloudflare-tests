@@ -5,11 +5,14 @@
   "type": "module",
   "scripts": {
     "build": "tsc -b && vp build",
+    "build-storybook": "storybook build",
     "cf-typegen": "wrangler types",
     "dev": "vp dev",
     "knip": "knip",
     "prepare": "vp config",
     "preview": "vp preview",
+    "storybook": "storybook dev -p 6006",
+    "test-storybook": "vitest run --project storybook",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push"
@@ -35,13 +38,24 @@
     "@cloudflare/vite-plugin": "^1.57.1",
     "@cloudflare/workers-types": "^5.20260921.1",
     "@solidjs/vite-plugin": "3.0.0-next.44",
+    "@storybook/addon-a11y": "10.6.2",
+    "@storybook/addon-docs": "10.6.2",
+    "@storybook/addon-vitest": "10.6.2",
     "@types/node": "^26.6.2",
+    "@vitest/browser": "4.1.11",
+    "@vitest/browser-playwright": "4.1.11",
+    "@vitest/runner": "4.1.11",
     "daisyui": "^5.7.42",
     "drizzle-kit": "^0.31.11",
     "knip": "^6.37.0",
+    "playwright": "^1.64.1",
+    "storybook": "10.6.2",
+    "storybook-solidjs-vite": "10.7.2",
     "typescript": "~7.0.2",
     "vite": "catalog:",
-    "vite-plus": "catalog:"
+    "vite-plugin-solid": "3.0.0-next.27",
+    "vite-plus": "catalog:",
+    "vitest": "4.1.11"
   },
   "packageManager": "pnpm@12.5.1"
 }
