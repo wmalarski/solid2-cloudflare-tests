@@ -8,7 +8,9 @@ import "../src/index.css";
  */
 const withI18n = createJSXDecorator((Story) => (
   <I18nContextProvider>
-    <Story />
+    <div data-theme="forest" class="p-4">
+      <Story />
+    </div>
   </I18nContextProvider>
 ));
 

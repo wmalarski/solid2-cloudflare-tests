@@ -51,6 +51,7 @@ export const renderWithProviders = (
 
   const container = document.createElement("div");
   container.setAttribute("data-testid", testId);
+  container.setAttribute("data-theme", "forest");
   document.body.appendChild(container);
 
   disposers.push(render(composeProviders(component, providers), container));
