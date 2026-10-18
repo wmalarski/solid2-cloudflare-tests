@@ -20,6 +20,12 @@ storybook-static
 # Vitest artifacts (attachment/failure screenshots, reports)
 .vitest
 
+# Playwright artifacts (traces, screenshots, videos, HTML report)
+test-results
+playwright-report
+blob-report
+playwright/.cache
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

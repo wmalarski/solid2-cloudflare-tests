@@ -117,6 +117,23 @@ The same worker is wired into the `ui` project, so unit tests can opt into API
 mocking when needed. See `src/modules/dashboard/tasks-board.test.tsx` for a
 worked example.
 
+### End-to-end tests (Playwright)
+
+Real-browser E2E tests live in `e2e/` and run with
+[Playwright Test](https://playwright.dev). Unlike the Vitest projects above,
+these hit the **actual dev server** — the Solid client, the Hono Worker and its
+Cloudflare bindings (D1 via `wrangler.jsonc`) all run for real, with no MSW.
+
+```bash
+pnpm test-e2e          # run the suite (boots `pnpm dev` for you)
+pnpm test-e2e-ui       # interactive UI mode
+pnpm test-e2e --headed # watch it in a real browser window
+```
+
+`playwright.config.ts` starts the dev server via its `webServer` block (and
+reuses one you already have running locally), so there is nothing to launch by
+hand. `e2e/sign-in.spec.ts` is a worked example.
+
 All browser-mode projects need a Playwright browser once:
 `pnpm exec playwright install chromium`.
 
