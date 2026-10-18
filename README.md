@@ -68,7 +68,7 @@ resets the DOM between tests).
 To (re)generate reference screenshots after an intentional visual change:
 
 ```bash
-pnpm test-ui -- -u
+pnpm test-ui -u
 ```
 
 ### Integration tests (MSW)
