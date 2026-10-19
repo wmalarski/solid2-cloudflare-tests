@@ -1,7 +1,19 @@
 import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
-import { readdir } from "node:fs/promises";
-import { readFile } from "node:fs/promises";
-import type { SelectTodosItem } from "~/modules/dashboard/routes/types";
+import { readdir, readFile, writeFile } from "node:fs/promises";
+
+const DATA_DIR = "src/scripts/data";
+const DATA_JSON = "src/scripts/data.json";
+const OUTPUT_SQL = "src/scripts/seed.sql";
+
+const DATABASE_NAME = "albums";
+
+/**
+ * Fallback owner for the seeded tasks. The `task.user_id` column is NOT NULL and
+ * references `user.id`, so every row needs a user that already exists in D1.
+ * This is the user present in `src/scripts/dump-remote.sql`; override it with
+ * `SEED_USER_ID=<id> node src/scripts/transforming.ts` if needed.
+ */
+const DEFAULT_USER_ID = "Q7jE1mMta1h79E89L6VxoJq6vuEq3PgD";
 
 type Task = {
   doneAt?: number;
@@ -16,58 +28,148 @@ type DataEntry = {
   id: number;
 };
 
-const getDataMap = async () => {
-  const data = await readFile("src/scripts/data.json", { encoding: "utf8" });
-  const json = JSON.parse(data) as DataEntry[];
-  const map = new Map(json.map((entry) => [entry.id, entry] as const));
-  return map;
+/** A row of the `task` table, using the column names declared in the Drizzle schema. */
+type TaskRow = {
+  created_at: number;
+  done_at: number | null;
+  id: string;
+  note: string | null;
+  preview: string;
+  rate: number | null;
+  release_date: number | null;
+  spotify_artists: string;
+  spotify_id: string;
+  spotify_uri: string;
+  status: string;
+  title: string;
+  updated_at: number;
+  url: string;
+  user_id: string;
 };
 
-const mapToTask = (entry?: DataEntry, album?: SimplifiedAlbum): SelectTodosItem | null => {
-  if (!entry || !album) {
+/** Column order used in the generated INSERT statements (mirrors the Drizzle schema). */
+const COLUMNS = [
+  "created_at",
+  "done_at",
+  "id",
+  "note",
+  "preview",
+  "rate",
+  "release_date",
+  "title",
+  "status",
+  "spotify_id",
+  "spotify_artists",
+  "spotify_uri",
+  "updated_at",
+  "url",
+  "user_id",
+] as const;
+
+const getDataMap = async () => {
+  const data = await readFile(DATA_JSON, { encoding: "utf8" });
+  const json = JSON.parse(data) as DataEntry[];
+  return new Map(json.map((entry) => [entry.id, entry] as const));
+};
+
+/** Drizzle stores `integer({ mode: "timestamp" })` as whole epoch seconds. */
+const toEpochSeconds = (milliseconds?: number): number | null => {
+  if (milliseconds === undefined || milliseconds === null) {
     return null;
   }
+  return Math.floor(milliseconds / 1000);
+};
 
-  return {
-    createdAt: null,
-    doneAt: entry.task.doneAt ? `${entry.task.doneAt}` : null,
-    id: entry.task.id,
-    note: entry.task.note,
-    preview: JSON.stringify(album.images),
-    rate: entry.task.rate ? entry.task.rate : null,
-    releaseDate: album.release_date,
-    spotifyArtists: JSON.stringify(album.artists),
-    spotifyId: album.id,
-    spotifyUri: album.uri,
-    status: entry.task.status,
-    title: album.name,
-    updatedAt: null,
-    url: album.href,
-    userId: "",
-  };
+/** Spotify only guarantees day/month/year precision; `Date` normalises all three. */
+const releaseDateToEpochSeconds = (releaseDate: string): number | null => {
+  const milliseconds = Date.parse(releaseDate);
+  return Number.isNaN(milliseconds) ? null : Math.floor(milliseconds / 1000);
+};
+
+const toTaskRow = (
+  entry: DataEntry,
+  album: SimplifiedAlbum,
+  userId: string,
+  timestamp: number,
+): TaskRow => ({
+  created_at: timestamp,
+  done_at: toEpochSeconds(entry.task.doneAt),
+  id: entry.task.id,
+  note: entry.task.note ?? null,
+  preview: JSON.stringify(album.images),
+  rate: entry.task.rate ?? null,
+  release_date: releaseDateToEpochSeconds(album.release_date),
+  spotify_artists: JSON.stringify(album.artists),
+  spotify_id: album.id,
+  spotify_uri: album.uri,
+  status: entry.task.status,
+  title: album.name,
+  updated_at: timestamp,
+  url: album.external_urls.spotify,
+  user_id: userId,
+});
+
+/** Renders one JS value as a SQLite literal, escaping single quotes in strings. */
+const toSqlLiteral = (value: TaskRow[(typeof COLUMNS)[number]]): string => {
+  if (value === null || value === undefined) {
+    return "NULL";
+  }
+  if (typeof value === "number") {
+    return `${value}`;
+  }
+  return `'${value.replaceAll("'", "''")}'`;
+};
+
+const toInsertStatement = (row: TaskRow): string => {
+  const values = COLUMNS.map((column) => toSqlLiteral(row[column])).join(", ");
+  return `INSERT OR IGNORE INTO "task" (${COLUMNS.map((column) => `"${column}"`).join(", ")}) VALUES (${values});`;
 };
 
 const main = async () => {
   const dataMap = await getDataMap();
+  const userId = process.env["SEED_USER_ID"] ?? DEFAULT_USER_ID;
+  const timestamp = Math.floor(Date.now() / 1000);
 
-  const files = await readdir("src/scripts/data");
-  const filenames = files.filter((file) => file.endsWith(".json"));
-  const todos: SelectTodosItem[] = [];
+  const files = (await readdir(DATA_DIR)).filter((file) => file.endsWith(".json"));
+  // Sort numerically so the generated file is stable regardless of directory order.
+  files.sort((a, b) => Number(a.replace(".json", "")) - Number(b.replace(".json", "")));
 
-  for (const filename of filenames) {
-    const text = await readFile(`src/scripts/data/${filename}`, { encoding: "utf8" });
-    const id = Number(filename.replaceAll(".json", ""));
-    const json = JSON.parse(text).albums.items as SimplifiedAlbum[];
-    const album = json.at(0);
-    const task = dataMap.get(id);
+  const rows: TaskRow[] = [];
+  // `task.spotify_id` is unique, and several source entries can resolve to the
+  // same Spotify album (the search query was duplicated). Keep the first match.
+  const seenSpotifyIds = new Set<string>();
 
-    const mapped = mapToTask(task, album);
-    if (mapped) {
-      todos.push(mapped);
+  for (const filename of files) {
+    const id = Number(filename.replace(".json", ""));
+    const entry = dataMap.get(id);
+
+    if (!entry) {
+      continue;
     }
+
+    const text = await readFile(`${DATA_DIR}/${filename}`, { encoding: "utf8" });
+    const album = (
+      JSON.parse(text) as { albums?: { items?: SimplifiedAlbum[] } }
+    ).albums?.items?.at(0);
+
+    if (!album || seenSpotifyIds.has(album.id)) {
+      continue;
+    }
+
+    seenSpotifyIds.add(album.id);
+    rows.push(toTaskRow(entry, album, userId, timestamp));
   }
 
-  console.log(JSON.stringify(todos, null, 2));
+  const sql = [
+    `-- Generated by src/scripts/transforming.ts for the "${DATABASE_NAME}" D1 database.`,
+    `-- Seed owner (task.user_id): ${userId}`,
+    ...rows.map((row) => toInsertStatement(row)),
+    "",
+  ].join("\n");
+
+  await writeFile(OUTPUT_SQL, sql);
+  console.log(`Wrote ${rows.length} task rows to ${OUTPUT_SQL}`);
+  console.log(`Seed with: wrangler d1 execute ${DATABASE_NAME} --remote --file=${OUTPUT_SQL}`);
 };
 
 void main();
