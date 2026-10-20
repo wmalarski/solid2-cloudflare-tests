@@ -2,7 +2,10 @@ import { createContext, createMemo, useContext, type Component, type ParentProps
 import { authClient } from "./auth-client";
 
 export const createSessionResource = () => {
-  return createMemo(() => authClient.getAccessToken({ useAccountCookie: true }));
+  return createMemo(async () => {
+    const { data } = await authClient.getSession();
+    return data;
+  });
 };
 
 type AuthContextValue = ReturnType<typeof createSessionResource>;

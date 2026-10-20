@@ -18,7 +18,7 @@ export const App = () => {
         <Errored fallback={ErrorFallback}>
           <Loading>
             <AuthContextProvider value={session}>
-              <Show when={session().data} fallback={<SignInForm />}>
+              <Show when={session()} fallback={<SignInForm />}>
                 <DashboardContainer />
               </Show>
             </AuthContextProvider>

@@ -1,4 +1,4 @@
-import { authorizedMiddleware } from "~/integrations/better-auth/middleware";
+import { accessTokenMiddleware, authorizedMiddleware } from "~/integrations/better-auth/middleware";
 import { getSpotifyAlbum, getSpotifyAlbums } from "~/integrations/spotify/fetch";
 import { factory } from "~/worker/factory";
 import { sValidator } from "@hono/standard-validator";
@@ -14,7 +14,7 @@ const albumIdsSchema = v.object({
 
 export const albumsRoute = factory
   .createApp()
-  .use(authorizedMiddleware)
+  .use(authorizedMiddleware, accessTokenMiddleware)
   .get("/", sValidator("query", albumIdsSchema), async (context) => {
     const accessTokens = context.get("accessTokens");
     const albumIds = context.req.valid("query").albumIds;
