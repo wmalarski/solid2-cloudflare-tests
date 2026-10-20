@@ -3,11 +3,16 @@ import { factory } from "~/worker/factory";
 import { account } from "~/integrations/drizzle/schema";
 import { initBetterAuth } from "./init";
 
-export const betterAuthMiddleware = factory.createMiddleware(async (context, next) => {
+export const authMiddleware = factory.createMiddleware(async (context, next) => {
   const db = context.get("db");
 
-  const auth = initBetterAuth({ env: context.env, db });
-  context.set("auth", auth);
+  context.set("auth", initBetterAuth({ env: context.env, db }));
+
+  return next();
+});
+
+export const sessionMiddleware = factory.createMiddleware(async (context, next) => {
+  const auth = context.get("auth");
 
   try {
     const response = await auth.api.getSession({ headers: context.req.raw.headers });

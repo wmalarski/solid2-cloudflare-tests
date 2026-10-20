@@ -2,16 +2,6 @@ import { HttpResponse, http } from "msw/http";
 
 // --- better-auth ---------------------------------------------------------
 
-const getAccessToken = () =>
-  http.post("/api/auth/get-access-token", () =>
-    HttpResponse.json({
-      accessToken: "mock-access-token",
-      accessTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-      idToken: "mock-id-token",
-      tokenType: "Bearer",
-    }),
-  );
-
 const getAuthSession = () => http.get("/api/auth/get-session", () => HttpResponse.json(null));
 
 const getSession = () => http.get("/api/auth/session", () => HttpResponse.json(null));
@@ -32,7 +22,6 @@ const authFallback = () => http.all("/api/auth/*", () => HttpResponse.json({}));
  */
 export const authHandlers = [
   // better-auth
-  getAccessToken(),
   getAuthSession(),
   getSession(),
   signOut(),

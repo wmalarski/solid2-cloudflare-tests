@@ -1,6 +1,6 @@
 import { dbMiddleware } from "~/integrations/drizzle/middleware";
 import { factory } from "./factory";
-import { betterAuthMiddleware } from "~/integrations/better-auth/middleware";
+import { authMiddleware, sessionMiddleware } from "~/integrations/better-auth/middleware";
 import { cors } from "hono/cors";
 import { albumsRoute } from "~/modules/dashboard/routes/albums";
 import { artistsRoute } from "~/modules/dashboard/routes/artists";
@@ -21,13 +21,14 @@ const routes = app
       credentials: true,
     }),
     dbMiddleware,
-    betterAuthMiddleware,
+    authMiddleware,
   )
   .on(["POST", "GET"], "/api/auth/*", async (context) => {
     const auth = context.get("auth");
     const response = await auth.handler(context.req.raw);
     return response;
   })
+  .use("/api/*", sessionMiddleware)
   .route("/api/albums", albumsRoute)
   .route("/api/artists", artistsRoute)
   .route("/api/player", playerRoute)
