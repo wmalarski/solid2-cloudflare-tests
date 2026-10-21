@@ -3,6 +3,18 @@ import { config } from "dotenv";
 
 config();
 
+const QUOTA_EXCEEDED = "QUOTA_EXCEEDED";
+
+const assertNoQuotaError = (json: unknown) => {
+  const error = (json as { error?: { status?: number; message?: string; reason?: string } })?.error;
+
+  if (error?.reason === QUOTA_EXCEEDED) {
+    throw new Error(
+      `Spotify request failed: ${QUOTA_EXCEEDED}${error.message ? ` (${error.status}: ${error.message})` : ""}`,
+    );
+  }
+};
+
 const fetchToken = async () => {
   const spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
   const spotifyClientSecret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -23,6 +35,8 @@ const fetchToken = async () => {
 
   const json = await response.json();
 
+  assertNoQuotaError(json);
+
   return json;
 };
 const fetchAlbum = async (title: string, accessToken: string) => {
@@ -32,6 +46,7 @@ const fetchAlbum = async (title: string, accessToken: string) => {
   headers.set("Authorization", `Bearer ${accessToken}`);
   const response = await fetch(url, { headers });
   const json = await response.json();
+  assertNoQuotaError(json);
   return json;
 };
 
@@ -67,4 +82,7 @@ const main = async () => {
   }
 };
 
-void main();
+void main().catch((error: unknown) => {
+  console.error(error);
+  process.exitCode = 1;
+});
