@@ -6,7 +6,7 @@ import { Fieldset, FieldsetLabel } from "~/ui/fieldset/fieldset";
 import { FormError } from "~/ui/form-error/form-error";
 import { Input } from "~/ui/input/input";
 import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
-import type { SelectTodosItem } from "./routes/types";
+import type { SelectTasksItem } from "./routes/types";
 import { Select } from "~/ui/select/select";
 import { BOOKMARK_STATUSES, STATUS_IN_PROGRESS } from "./constansts";
 import { taskStatusSchema } from "./validation";
@@ -24,7 +24,7 @@ export const taskFieldsSchema = v.object({
 type TaskFieldsProps = {
   pending?: boolean;
   issues?: FormIssues;
-  initialValues?: SelectTodosItem;
+  initialValues?: SelectTasksItem;
 };
 
 export const TaskFields: Component<TaskFieldsProps> = (props) => {

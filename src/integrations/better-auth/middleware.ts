@@ -1,12 +1,15 @@
 import { and, eq } from "drizzle-orm";
+import { HTTPException } from "hono/http-exception";
 import { factory } from "~/worker/factory";
 import { account } from "~/integrations/drizzle/schema";
+import { logError, logWarn, serializeError } from "~/integrations/logger";
 import { initBetterAuth } from "./init";
 
 export const authMiddleware = factory.createMiddleware(async (context, next) => {
   const db = context.get("db");
+  const config = context.get("config");
 
-  context.set("auth", initBetterAuth({ env: context.env, db }));
+  context.set("auth", initBetterAuth({ config, db }));
 
   return next();
 });
@@ -17,13 +20,15 @@ export const sessionMiddleware = factory.createMiddleware(async (context, next) 
   try {
     const response = await auth.api.getSession({ headers: context.req.raw.headers });
 
-    const session = response?.session ?? null;
-    const user = response?.user ?? null;
+    context.set("session", response?.session ?? null);
+    context.set("user", response?.user ?? null);
+  } catch (error) {
+    logError("session_lookup_failed", {
+      requestId: context.get("requestId"),
+      error: serializeError(error),
+    });
 
-    context.set("session", session);
-    context.set("user", user);
-  } catch {
-    //
+    throw error;
   }
 
   return next();
@@ -31,10 +36,9 @@ export const sessionMiddleware = factory.createMiddleware(async (context, next) 
 
 export const authorizedMiddleware = factory.createMiddleware(async (context, next) => {
   const session = context.get("session");
-  const auth = context.get("auth");
 
-  if (!auth || !session) {
-    return context.text("Unauthorized", 401);
+  if (!session) {
+    throw new HTTPException(401, { message: "Unauthorized" });
   }
 
   context.set("authorizedSession", session);
@@ -47,28 +51,43 @@ export const accessTokenMiddleware = factory.createMiddleware(async (context, ne
   const session = context.get("session");
   const auth = context.get("auth");
 
-  if (!auth || !session) {
-    return context.text("Unauthorized", 401);
+  if (!session) {
+    throw new HTTPException(401, { message: "Unauthorized" });
   }
 
-  // `/get-access-token` needs an explicit account. `useAccountCookie` only
-  // works when `account.storeAccountCookie` is enabled, which is off whenever
-  // a database adapter is configured (the default for this app).
   const linkedAccount = await db.query.account.findFirst({
     columns: { id: true },
     where: and(eq(account.userId, session.userId), eq(account.providerId, "spotify")),
   });
 
   if (!linkedAccount) {
-    return context.json({ message: "Spotify account is not linked" }, 403);
+    throw new HTTPException(403, { message: "Spotify account is not linked" });
   }
 
-  const accessToken = await auth.api.getAccessToken({
-    headers: context.req.raw.headers,
-    body: { accountId: linkedAccount.id },
-  });
+  try {
+    const accessToken = await auth.api.getAccessToken({
+      headers: context.req.raw.headers,
+      body: { accountId: linkedAccount.id },
+    });
 
-  context.set("accessTokens", accessToken);
+    context.set("accessTokens", accessToken);
+  } catch (error) {
+    logWarn("spotify_access_token_failed", {
+      requestId: context.get("requestId"),
+      error: serializeError(error),
+    });
+
+    const status = (error as { status?: number }).status;
+
+    // A 5xx here is a better-auth/D1 failure, not an expired Spotify grant.
+    if (typeof status === "number" && status >= 500) {
+      throw error;
+    }
+
+    throw new HTTPException(401, {
+      message: "Spotify authorization expired. Please sign in again.",
+    });
+  }
 
   return next();
 });

@@ -6,21 +6,18 @@ import {
   getSpotifyRelatedAlbums,
   getSpotifyRelatedArtists,
 } from "~/integrations/spotify/fetch";
+import { spotifyIdSchema, spotifyIdsQuerySchema } from "~/integrations/spotify/validation";
 import { factory } from "~/worker/factory";
+import { spotifyReadRateLimit } from "./rate-limit";
 import { sValidator } from "@hono/standard-validator";
 import * as v from "valibot";
 
-const artistIdSchema = v.object({ artistId: v.string() });
-const artistIdsSchema = v.object({
-  artistIds: v.pipe(
-    v.string(),
-    v.transform((value) => value.split(",")),
-  ),
-});
+const artistIdSchema = v.object({ artistId: spotifyIdSchema });
+const artistIdsSchema = v.object({ artistIds: spotifyIdsQuerySchema });
 
 export const artistsRoute = factory
   .createApp()
-  .use(authorizedMiddleware, accessTokenMiddleware)
+  .use(authorizedMiddleware, accessTokenMiddleware, spotifyReadRateLimit)
   .get("/", sValidator("query", artistIdsSchema), async (context) => {
     const accessTokens = context.get("accessTokens");
     const artistIds = context.req.valid("query").artistIds;

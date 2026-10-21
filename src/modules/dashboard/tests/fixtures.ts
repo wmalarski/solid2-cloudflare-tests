@@ -12,8 +12,8 @@ import type { TaskStatus } from "~/modules/dashboard/validation";
 import { STATUS_NEW } from "~/modules/dashboard/constansts";
 
 /**
- * A `task` row as it crosses the wire: the Worker serialises Drizzle's
- * `Date` columns to ISO strings, so timestamps are `string | null` here.
+ * A `task` row as it crosses the wire. The Worker returns a DTO with ISO
+ * timestamp strings and without the internal `userId`.
  */
 export type MockTask = {
   createdAt: string | null;
@@ -30,7 +30,6 @@ export type MockTask = {
   title: string;
   updatedAt: string | null;
   url: string | null;
-  userId: string;
 };
 
 /**
@@ -193,7 +192,6 @@ export const createTaskFromAlbum = (
   title: album.name,
   updatedAt: "2026-01-01T00:00:00.000Z",
   url: album.external_urls.spotify,
-  userId: "user-1",
   ...overrides,
 });
 

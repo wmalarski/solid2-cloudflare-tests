@@ -1,40 +1,47 @@
 import { dbMiddleware } from "~/integrations/drizzle/middleware";
 import { factory } from "./factory";
 import { authMiddleware, sessionMiddleware } from "~/integrations/better-auth/middleware";
-import { cors } from "hono/cors";
 import { albumsRoute } from "~/modules/dashboard/routes/albums";
 import { artistsRoute } from "~/modules/dashboard/routes/artists";
 import { playerRoute } from "~/modules/dashboard/routes/player";
 import { tasksRoute } from "~/modules/dashboard/routes/tasks";
+import { envMiddleware } from "./env/middleware";
+import { SpotifyError, onSpotifyError } from "~/integrations/spotify/errors";
+import { onEnvValidationError, EnvValidationError } from "./env/errors";
+import { onErrorFallback } from "./errors";
+import { requestLogger } from "./request-logger";
 
 const app = factory.createApp();
 
 const routes = app
-  .use(
-    "/api/*",
-    cors({
-      origin: "http://127.0.0.1:5173", // replace with your origin
-      allowHeaders: ["Content-Type", "Authorization"],
-      allowMethods: ["POST", "GET", "OPTIONS"],
-      exposeHeaders: ["Content-Length"],
-      maxAge: 600,
-      credentials: true,
-    }),
-    dbMiddleware,
-    authMiddleware,
-  )
-  .on(["POST", "GET"], "/api/auth/*", async (context) => {
+  .use("*", requestLogger)
+  .use("/api/*", envMiddleware, dbMiddleware, authMiddleware)
+  .all("/api/auth/*", async (context) => {
     const auth = context.get("auth");
-    const response = await auth.handler(context.req.raw);
-    return response;
+    return auth.handler(context.req.raw);
   })
   .use("/api/*", sessionMiddleware)
   .route("/api/albums", albumsRoute)
   .route("/api/artists", artistsRoute)
   .route("/api/player", playerRoute)
   .route("/api/tasks", tasksRoute)
-  .get("*", (context) => context.env.ASSETS.fetch(context.req.raw));
+  .notFound((context) => {
+    if (context.req.path.startsWith("/api/")) {
+      return context.json({ message: "Not found", requestId: context.get("requestId") }, 404);
+    }
+    return context.env.ASSETS.fetch(context.req.raw);
+  })
+  .onError((error, context) => {
+    switch (true) {
+      case error instanceof EnvValidationError:
+        return onEnvValidationError(error, context);
+      case error instanceof SpotifyError:
+        return onSpotifyError(error, context);
+      default:
+        return onErrorFallback(error, context);
+    }
+  });
 
-export default app;
+export default routes;
 
 export type AppType = typeof routes;

@@ -1,28 +1,33 @@
-import { factory } from "~/worker/factory";
-import * as v from "valibot";
+import { and, eq } from "drizzle-orm";
+import { HTTPException } from "hono/http-exception";
 import { sValidator } from "@hono/standard-validator";
+import * as v from "valibot";
+import { factory } from "~/worker/factory";
 import { accessTokenMiddleware, authorizedMiddleware } from "~/integrations/better-auth/middleware";
 import { getSpotifyAlbum } from "~/integrations/spotify/fetch";
+import { spotifyIdSchema } from "~/integrations/spotify/validation";
 import { schema } from "~/integrations/drizzle/schema";
-import { and, eq } from "drizzle-orm";
+import { taskInsertRateLimit } from "./rate-limit";
+import { STATUS_REVIEWED } from "../constansts";
+import { toTaskDto } from "../task-dto";
 import { taskStatusSchema } from "../validation";
 
 export const SELECT_TASKS_DEFAULT_LIMIT = 10;
 
-const taskIdSchema = v.object({ taskId: v.string() });
+const taskIdSchema = v.object({ taskId: v.pipe(v.string(), v.minLength(1)) });
+
+const taskFieldsSchema = {
+  note: v.optional(v.pipe(v.string(), v.maxLength(2_000))),
+  rate: v.optional(v.pipe(v.number(), v.minValue(0), v.maxValue(10))),
+  status: taskStatusSchema,
+};
 
 const insertTaskSchema = v.object({
-  albumId: v.string(),
-  note: v.optional(v.string()),
-  rate: v.optional(v.number()),
-  status: taskStatusSchema,
+  albumId: spotifyIdSchema,
+  ...taskFieldsSchema,
 });
 
-const updateTaskSchema = v.object({
-  note: v.optional(v.string()),
-  rate: v.optional(v.number()),
-  status: taskStatusSchema,
-});
+const updateTaskSchema = v.object(taskFieldsSchema);
 
 const selectTasksSchema = v.object({
   page: v.optional(v.number()),
@@ -32,7 +37,7 @@ const selectTasksSchema = v.object({
 export const tasksRoute = factory
   .createApp()
   .use(authorizedMiddleware, accessTokenMiddleware)
-  .post("/", sValidator("json", insertTaskSchema), async (context) => {
+  .post("/", taskInsertRateLimit, sValidator("json", insertTaskSchema), async (context) => {
     const session = context.get("authorizedSession");
     const accessTokens = context.get("accessTokens");
     const json = context.req.valid("json");
@@ -41,27 +46,36 @@ export const tasksRoute = factory
     const album = await getSpotifyAlbum({ albumId: json.albumId, accessTokens });
 
     if (!album) {
-      return context.status(400);
+      throw new HTTPException(404, { message: "Album not found" });
     }
 
-    const taskId = crypto.randomUUID();
+    const now = new Date();
+    const [created] = await db
+      .insert(schema.task)
+      .values({
+        createdAt: now,
+        id: crypto.randomUUID(),
+        note: json.note,
+        preview: JSON.stringify(album.images),
+        rate: json.rate,
+        releaseDate: new Date(album.release_date),
+        spotifyArtists: JSON.stringify(album.artists),
+        spotifyId: album.id,
+        spotifyUri: album.uri,
+        status: json.status,
+        title: album.name,
+        updatedAt: now,
+        url: album.external_urls.spotify,
+        userId: session.userId,
+      })
+      .onConflictDoNothing()
+      .returning();
 
-    const response = await db.insert(schema.task).values({
-      id: taskId,
-      note: json.note,
-      preview: JSON.stringify(album.images),
-      rate: json.rate,
-      releaseDate: new Date(album.release_date),
-      spotifyArtists: JSON.stringify(album.artists),
-      spotifyId: album.id,
-      spotifyUri: album.uri,
-      status: json.status,
-      title: album.name,
-      url: album.external_urls.spotify,
-      userId: session.userId,
-    });
+    if (!created) {
+      throw new HTTPException(409, { message: "This album is already in your tasks" });
+    }
 
-    return context.json(response.results);
+    return context.json(toTaskDto(created), 201);
   })
   .put(
     "/:taskId",
@@ -73,12 +87,33 @@ export const tasksRoute = factory
       const json = context.req.valid("json");
       const db = context.get("db");
 
-      const response = await db
-        .update(schema.task)
-        .set(json)
-        .where(and(eq(schema.task.id, taskId), eq(schema.task.userId, session.userId)));
+      const [existing] = await db
+        .select()
+        .from(schema.task)
+        .where(and(eq(schema.task.id, taskId), eq(schema.task.userId, session.userId)))
+        .limit(1);
 
-      return context.json(response.results);
+      if (!existing) {
+        throw new HTTPException(404, { message: "Task not found" });
+      }
+
+      const [updated] = await db
+        .update(schema.task)
+        .set({
+          doneAt: json.status === STATUS_REVIEWED ? (existing.doneAt ?? new Date()) : null,
+          note: json.note,
+          rate: json.rate,
+          status: json.status,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(schema.task.id, taskId), eq(schema.task.userId, session.userId)))
+        .returning();
+
+      if (!updated) {
+        throw new HTTPException(404, { message: "Task not found" });
+      }
+
+      return context.json(toTaskDto(updated));
     },
   )
   .delete("/:taskId", sValidator("param", taskIdSchema), async (context) => {
@@ -86,23 +121,28 @@ export const tasksRoute = factory
     const taskId = context.req.valid("param").taskId;
     const db = context.get("db");
 
-    const response = await db
+    const [deleted] = await db
       .delete(schema.task)
-      .where(and(eq(schema.task.id, taskId), eq(schema.task.userId, session.userId)));
+      .where(and(eq(schema.task.id, taskId), eq(schema.task.userId, session.userId)))
+      .returning({ id: schema.task.id });
 
-    return context.json(response.results);
+    if (!deleted) {
+      throw new HTTPException(404, { message: "Task not found" });
+    }
+
+    return context.body(null, 204);
   })
   .get("/", sValidator("query", selectTasksSchema), async (context) => {
     const session = context.get("authorizedSession");
     const query = context.req.valid("query");
     const db = context.get("db");
 
-    const response = await db
+    const rows = await db
       .select()
       .from(schema.task)
       .where(and(eq(schema.task.status, query.status), eq(schema.task.userId, session.userId)))
       .limit(SELECT_TASKS_DEFAULT_LIMIT)
       .offset(SELECT_TASKS_DEFAULT_LIMIT * (query.page ?? 0));
 
-    return context.json(response);
+    return context.json(rows.map(toTaskDto));
   });

@@ -1,20 +1,17 @@
 import { accessTokenMiddleware, authorizedMiddleware } from "~/integrations/better-auth/middleware";
 import { getSpotifyAlbum, getSpotifyAlbums } from "~/integrations/spotify/fetch";
+import { spotifyIdSchema, spotifyIdsQuerySchema } from "~/integrations/spotify/validation";
 import { factory } from "~/worker/factory";
+import { spotifyReadRateLimit } from "./rate-limit";
 import { sValidator } from "@hono/standard-validator";
 import * as v from "valibot";
 
-const albumIdSchema = v.object({ albumId: v.string() });
-const albumIdsSchema = v.object({
-  albumIds: v.pipe(
-    v.string(),
-    v.transform((value) => value.split(",")),
-  ),
-});
+const albumIdSchema = v.object({ albumId: spotifyIdSchema });
+const albumIdsSchema = v.object({ albumIds: spotifyIdsQuerySchema });
 
 export const albumsRoute = factory
   .createApp()
-  .use(authorizedMiddleware, accessTokenMiddleware)
+  .use(authorizedMiddleware, accessTokenMiddleware, spotifyReadRateLimit)
   .get("/", sValidator("query", albumIdsSchema), async (context) => {
     const accessTokens = context.get("accessTokens");
     const albumIds = context.req.valid("query").albumIds;

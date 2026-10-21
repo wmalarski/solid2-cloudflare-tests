@@ -1,5 +1,6 @@
 import { HttpResponse, http } from "msw/http";
 import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
+import { STATUS_REVIEWED } from "~/modules/dashboard/constansts";
 import type { TaskStatus } from "~/modules/dashboard/validation";
 import { getMockDb } from "~/testing/msw/db";
 import {
@@ -74,7 +75,7 @@ const insertTask = () =>
 
     getMockDb().tasks.push(task);
 
-    return HttpResponse.json([task]);
+    return HttpResponse.json(task, { status: 201 });
   });
 
 const updateTask = () =>
@@ -87,24 +88,32 @@ const updateTask = () =>
 
     const task = getMockDb().tasks.find((candidate) => candidate.id === params.taskId);
     if (!task) {
-      return HttpResponse.json([]);
+      return HttpResponse.json({ message: "Task not found" }, { status: 404 });
     }
 
     if (json.note !== undefined) task.note = json.note;
     if (json.rate !== undefined) task.rate = json.rate;
-    if (json.status !== undefined) task.status = json.status;
+    if (json.status !== undefined) {
+      task.status = json.status;
+      task.doneAt = json.status === STATUS_REVIEWED ? (task.doneAt ?? now()) : null;
+    }
     task.updatedAt = now();
 
-    return HttpResponse.json([task]);
+    return HttpResponse.json(task);
   });
 
 const removeTask = () =>
   http.delete("/api/tasks/:taskId", ({ params }) => {
     const db = getMockDb();
     const index = db.tasks.findIndex((candidate) => candidate.id === params.taskId);
-    const removed = index === -1 ? [] : db.tasks.splice(index, 1);
 
-    return HttpResponse.json(removed);
+    if (index === -1) {
+      return HttpResponse.json({ message: "Task not found" }, { status: 404 });
+    }
+
+    db.tasks.splice(index, 1);
+
+    return new HttpResponse(null, { status: 204 });
   });
 
 // --- Albums --------------------------------------------------------------

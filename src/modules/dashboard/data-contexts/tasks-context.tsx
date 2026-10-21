@@ -36,9 +36,11 @@ const createTasksContext = () => {
 
   const insertAlbumAsTask = (album: SimplifiedAlbum) => {
     columns[STATUS_IN_PROGRESS].setResource((resource) => {
+      const now = new Date().toISOString();
+
       resource.push({
         id: crypto.randomUUID(),
-        createdAt: null,
+        createdAt: now,
         doneAt: null,
         note: null,
         preview: JSON.stringify(album.images),
@@ -48,9 +50,8 @@ const createTasksContext = () => {
         spotifyId: album.id,
         status: STATUS_IN_PROGRESS,
         title: album.name,
-        updatedAt: null,
+        updatedAt: now,
         url: album.external_urls.spotify,
-        userId: "self",
         spotifyUri: album.uri,
       });
     });
