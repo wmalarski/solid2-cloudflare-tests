@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vite-plus/test";
 import { renderUi } from "~/testing/render";
 import { expectScreenshot } from "~/testing/screenshot";
+import { FieldError } from "../field-error/field-error";
+import { FieldRoot } from "../field/field";
 import { Select } from "./select";
 
 describe("Select", () => {
@@ -37,6 +39,21 @@ describe("Select", () => {
     const select = container.querySelector("select")!;
     expect(select).toBeDisabled();
     expect(select).toHaveValue("b");
+  });
+
+  it("marks the select invalid from FieldRoot", () => {
+    const container = renderUi(() => (
+      <FieldRoot name="status" isInvalid>
+        <Select />
+        <FieldError message="Choose a status" />
+      </FieldRoot>
+    ));
+
+    const select = container.querySelector("select")!;
+    const error = container.querySelector("[role=alert]")!;
+    expect(select).toHaveAttribute("aria-invalid", "true");
+    expect(error.id).not.toBe("");
+    expect(select).toHaveAttribute("aria-describedby", error.id);
   });
 
   it("looks right across colors and sizes", async () => {

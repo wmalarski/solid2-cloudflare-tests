@@ -2,10 +2,11 @@ import { For, type Component } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/integrations/i18n";
 import { FieldError } from "~/ui/field-error/field-error";
+import { FieldRoot } from "~/ui/field/field";
 import { Fieldset, FieldsetLabel } from "~/ui/fieldset/fieldset";
 import { FormError } from "~/ui/form-error/form-error";
 import { Input } from "~/ui/input/input";
-import { getInvalidStateProps, type FormIssues } from "~/ui/utils/forms";
+import { type FormIssues } from "~/ui/utils/forms";
 import type { SelectTasksItem } from "./routes/types";
 import { Select } from "~/ui/select/select";
 import { BOOKMARK_STATUSES, STATUS_IN_PROGRESS } from "./constansts";
@@ -36,56 +37,40 @@ export const TaskFields: Component<TaskFieldsProps> = (props) => {
     <Fieldset>
       <FormError message={props.issues?.error} />
 
-      <FieldsetLabel for="note">{t("task.note")}</FieldsetLabel>
-      <Input
-        disabled={props.pending}
-        id="note"
-        name="note"
-        width="full"
-        value={props.initialValues?.note ?? ""}
-        {...getInvalidStateProps({
-          errorMessageId: "note-error",
-          isInvalid: Boolean(props.issues?.errors?.note),
-        })}
-      />
-      <FieldError id="note-error" message={props.issues?.errors?.note} />
+      <FieldRoot name="note" isInvalid={Boolean(props.issues?.errors?.note)}>
+        <FieldsetLabel>{t("task.note")}</FieldsetLabel>
+        <Input disabled={props.pending} width="full" value={props.initialValues?.note ?? ""} />
+        <FieldError message={props.issues?.errors?.note} />
+      </FieldRoot>
 
-      <FieldsetLabel for="rate">{t("task.rate")}</FieldsetLabel>
-      <Input
-        disabled={props.pending}
-        id="rate"
-        name="rate"
-        type="number"
-        min="0"
-        max="10"
-        step="0.1"
-        width="full"
-        value={props.initialValues?.rate ?? ""}
-        {...getInvalidStateProps({
-          errorMessageId: "rate-error",
-          isInvalid: Boolean(props.issues?.errors?.rate),
-        })}
-      />
-      <FieldError id="rate-error" message={props.issues?.errors?.rate} />
+      <FieldRoot name="rate" isInvalid={Boolean(props.issues?.errors?.rate)}>
+        <FieldsetLabel>{t("task.rate")}</FieldsetLabel>
+        <Input
+          disabled={props.pending}
+          type="number"
+          min="0"
+          max="10"
+          step="0.1"
+          width="full"
+          value={props.initialValues?.rate ?? ""}
+        />
+        <FieldError message={props.issues?.errors?.rate} />
+      </FieldRoot>
 
-      <FieldsetLabel for="status">{t("task.status")}</FieldsetLabel>
-      <Select
-        disabled={props.pending}
-        id="status"
-        name="status"
-        required={true}
-        class="w-full"
-        value={props.initialValues?.status ?? STATUS_IN_PROGRESS}
-        {...getInvalidStateProps({
-          errorMessageId: "status-error",
-          isInvalid: Boolean(props.issues?.errors?.status),
-        })}
-      >
-        <For each={BOOKMARK_STATUSES}>
-          {(status) => <option value={status}>{statusTranslations(status)}</option>}
-        </For>
-      </Select>
-      <FieldError id="status-error" message={props.issues?.errors?.status} />
+      <FieldRoot name="status" isInvalid={Boolean(props.issues?.errors?.status)}>
+        <FieldsetLabel>{t("task.status")}</FieldsetLabel>
+        <Select
+          disabled={props.pending}
+          required={true}
+          class="w-full"
+          value={props.initialValues?.status ?? STATUS_IN_PROGRESS}
+        >
+          <For each={BOOKMARK_STATUSES}>
+            {(status) => <option value={status}>{statusTranslations(status)}</option>}
+          </For>
+        </Select>
+        <FieldError message={props.issues?.errors?.status} />
+      </FieldRoot>
     </Fieldset>
   );
 };

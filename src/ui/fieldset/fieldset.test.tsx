@@ -2,6 +2,7 @@ import { describe, expect, it } from "vite-plus/test";
 import { Input } from "../input/input";
 import { renderUi } from "~/testing/render";
 import { expectScreenshot } from "~/testing/screenshot";
+import { FieldError } from "../field-error/field-error";
 import { FieldRoot } from "../field/field";
 import { Fieldset, FieldsetLabel, FieldsetLegend } from "./fieldset";
 
@@ -57,6 +58,54 @@ describe("Fieldset", () => {
     expect(container.querySelector("label")).toHaveAttribute("for", "custom-email");
     expect(container.querySelector("input")).toHaveAttribute("id", "custom-email");
     expect(container.querySelector("input")).toHaveAttribute("name", "custom-email");
+  });
+
+  it("marks the input invalid from FieldRoot", () => {
+    const container = renderUi(() => (
+      <FieldRoot name="email" isInvalid>
+        <FieldsetLabel>Email</FieldsetLabel>
+        <Input />
+        <FieldError message="Enter a valid email" />
+      </FieldRoot>
+    ));
+
+    const input = container.querySelector("input")!;
+    const error = container.querySelector("[role=alert]")!;
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(error.id).not.toBe("");
+    expect(input).toHaveAttribute("aria-describedby", error.id);
+  });
+
+  it("generates a distinct error id for each field", () => {
+    const container = renderUi(() => (
+      <>
+        <FieldRoot name="email" isInvalid>
+          <Input />
+          <FieldError message="Required" />
+        </FieldRoot>
+        <FieldRoot name="password" isInvalid>
+          <Input />
+          <FieldError message="Required" />
+        </FieldRoot>
+      </>
+    ));
+
+    const errors = container.querySelectorAll("[role=alert]");
+    expect(errors).toHaveLength(2);
+    expect(errors[0].id).not.toBe(errors[1].id);
+  });
+
+  it("does not mark inputs invalid by default", () => {
+    const container = renderUi(() => (
+      <FieldRoot name="email">
+        <FieldsetLabel>Email</FieldsetLabel>
+        <Input />
+      </FieldRoot>
+    ));
+
+    const input = container.querySelector("input")!;
+    expect(input).not.toHaveAttribute("aria-invalid");
+    expect(input).not.toHaveAttribute("aria-describedby");
   });
 
   it("merges custom classes", () => {

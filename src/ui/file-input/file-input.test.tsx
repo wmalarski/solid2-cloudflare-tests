@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vite-plus/test";
 import { renderUi } from "~/testing/render";
 import { expectScreenshot } from "~/testing/screenshot";
+import { FieldError } from "../field-error/field-error";
+import { FieldRoot } from "../field/field";
 import { FileInput } from "./file-input";
 
 describe("FileInput", () => {
@@ -26,6 +28,21 @@ describe("FileInput", () => {
     const container = renderUi(() => <FileInput disabled />);
 
     expect(container.querySelector("input")).toBeDisabled();
+  });
+
+  it("marks the file input invalid from FieldRoot", () => {
+    const container = renderUi(() => (
+      <FieldRoot name="cover" isInvalid>
+        <FileInput />
+        <FieldError message="Choose a cover" />
+      </FieldRoot>
+    ));
+
+    const input = container.querySelector("input")!;
+    const error = container.querySelector("[role=alert]")!;
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(error.id).not.toBe("");
+    expect(input).toHaveAttribute("aria-describedby", error.id);
   });
 
   it("looks right across colors and sizes", async () => {
