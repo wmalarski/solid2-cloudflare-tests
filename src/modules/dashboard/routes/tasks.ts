@@ -14,7 +14,9 @@ import { taskStatusSchema } from "../validation";
 
 export const SELECT_TASKS_DEFAULT_LIMIT = 10;
 
-const taskIdSchema = v.object({ taskId: v.pipe(v.string(), v.minLength(1)) });
+const taskIdSchema = v.pipe(v.string(), v.uuid("Expected a UUID"));
+
+const taskIdObjectSchema = v.object({ taskId: taskIdSchema });
 
 const taskFieldsSchema = {
   note: v.optional(v.pipe(v.string(), v.maxLength(2_000))),
@@ -24,6 +26,7 @@ const taskFieldsSchema = {
 
 const insertTaskSchema = v.object({
   albumId: spotifyIdSchema,
+  taskId: taskIdSchema,
   ...taskFieldsSchema,
 });
 
@@ -54,7 +57,7 @@ export const tasksRoute = factory
       .insert(schema.task)
       .values({
         createdAt: now,
-        id: crypto.randomUUID(),
+        id: json.taskId,
         note: json.note,
         preview: JSON.stringify(album.images),
         rate: json.rate,
@@ -68,7 +71,7 @@ export const tasksRoute = factory
         url: album.external_urls.spotify,
         userId: session.userId,
       })
-      .onConflictDoNothing()
+      .onConflictDoNothing({ target: [schema.task.userId, schema.task.spotifyId] })
       .returning();
 
     if (!created) {
@@ -79,7 +82,7 @@ export const tasksRoute = factory
   })
   .put(
     "/:taskId",
-    sValidator("param", taskIdSchema),
+    sValidator("param", taskIdObjectSchema),
     sValidator("json", updateTaskSchema),
     async (context) => {
       const session = context.get("authorizedSession");
@@ -116,7 +119,7 @@ export const tasksRoute = factory
       return context.json(toTaskDto(updated));
     },
   )
-  .delete("/:taskId", sValidator("param", taskIdSchema), async (context) => {
+  .delete("/:taskId", sValidator("param", taskIdObjectSchema), async (context) => {
     const session = context.get("authorizedSession");
     const taskId = context.req.valid("param").taskId;
     const db = context.get("db");

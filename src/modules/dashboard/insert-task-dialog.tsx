@@ -86,12 +86,12 @@ const InsertTaskForm: Component<InsertTaskFormProps> = (props) => {
       return;
     }
 
-    tasksContext.insertAlbumAsTask(props.album);
+    const task = tasksContext.insertAlbumAsTask({ album: props.album, ...parsed.output });
     props.onSubmitStart();
 
     yield parseResponse(
       honoClient.api.tasks.$post({
-        json: { albumId: props.album.id, ...parsed.output },
+        json: { albumId: props.album.id, ...parsed.output, taskId: task.id },
       }),
     );
 

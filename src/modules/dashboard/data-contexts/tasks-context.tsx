@@ -25,7 +25,7 @@ const createSelectTasksResource = (status: TaskStatus) => {
   return { resource, page, setPage, setResource };
 };
 
-export type TaskResourceItem = ReturnType<typeof createSelectTasksResource>["resource"][0];
+export type TaskResourceItem = ReturnType<typeof createSelectTasksResource>["resource"][number];
 
 const createTasksContext = () => {
   const columns = {
@@ -34,27 +34,37 @@ const createTasksContext = () => {
     [STATUS_REVIEWED]: createSelectTasksResource(STATUS_REVIEWED),
   };
 
-  const insertAlbumAsTask = (album: SimplifiedAlbum) => {
-    columns[STATUS_IN_PROGRESS].setResource((resource) => {
-      const now = new Date().toISOString();
+  type InsertAlbumAsTaskArgs = {
+    album: SimplifiedAlbum;
+    note: string;
+    rate?: number;
+    status: TaskStatus;
+  };
 
-      resource.push({
-        id: crypto.randomUUID(),
-        createdAt: now,
-        doneAt: null,
-        note: null,
-        preview: JSON.stringify(album.images),
-        rate: null,
-        releaseDate: album.release_date,
-        spotifyArtists: JSON.stringify(album.artists),
-        spotifyId: album.id,
-        status: STATUS_IN_PROGRESS,
-        title: album.name,
-        updatedAt: now,
-        url: album.external_urls.spotify,
-        spotifyUri: album.uri,
-      });
+  const insertAlbumAsTask = (args: InsertAlbumAsTaskArgs) => {
+    const now = new Date().toISOString();
+    const item: TaskResourceItem = {
+      id: crypto.randomUUID(),
+      createdAt: now,
+      doneAt: null,
+      note: args.note,
+      preview: JSON.stringify(args.album.images),
+      rate: args.rate ?? null,
+      releaseDate: args.album.release_date,
+      spotifyArtists: JSON.stringify(args.album.artists),
+      spotifyId: args.album.id,
+      status: args.status,
+      title: args.album.name,
+      updatedAt: now,
+      url: args.album.external_urls.spotify,
+      spotifyUri: args.album.uri,
+    };
+
+    columns[args.status].setResource((resource) => {
+      resource.push(item);
     });
+
+    return item;
   };
 
   const deleteTask = (status: TaskStatus, taskId: string) => {

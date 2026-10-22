@@ -59,6 +59,7 @@ const insertTask = () =>
   http.post("/api/tasks", async ({ request }) => {
     const json = (await request.json()) as {
       albumId: string;
+      taskId: string;
       note?: string;
       rate?: number;
       status: TaskStatus;
@@ -66,7 +67,7 @@ const insertTask = () =>
 
     const task: MockTask = createTaskFromAlbum(findAlbum(json.albumId), {
       createdAt: now(),
-      id: crypto.randomUUID(),
+      id: json.taskId,
       note: json.note ?? null,
       rate: json.rate ?? null,
       status: json.status,
