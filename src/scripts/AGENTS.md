@@ -68,8 +68,10 @@ schema in `src/integrations/drizzle/schema.ts`.
 
 - `task.user_id` is `NOT NULL`, so the seed needs an existing user. It uses
   `SEED_USER_ID` when set and otherwise falls back to the owner hardcoded in the
-  script. Override it for your own database:
-  `SEED_USER_ID=<user-id> node src/scripts/transforming.ts`.
+  script, which is the owner of the remote `albums` D1 database. Do not use the
+  user from `dump-remote.sql`: it only exists in the legacy database, and
+  seeding with it fails with `FOREIGN KEY constraint failed`. Override it for
+  your own database: `SEED_USER_ID=<user-id> node src/scripts/transforming.ts`.
 - Timestamps are written as epoch **seconds**, matching
   `integer({ mode: "timestamp" })`.
 - Duplicate Spotify album IDs are dropped (the unique index is

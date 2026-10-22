@@ -8,11 +8,9 @@ import { getSpotifyAlbum } from "~/integrations/spotify/fetch";
 import { spotifyIdSchema } from "~/integrations/spotify/validation";
 import { schema } from "~/integrations/drizzle/schema";
 import { taskInsertRateLimit } from "./rate-limit";
-import { STATUS_REVIEWED } from "../constansts";
+import { STATUS_REVIEWED, TASKS_PAGE_SIZE } from "../constansts";
 import { toTaskDto } from "../task-dto";
 import { taskStatusSchema } from "../validation";
-
-export const SELECT_TASKS_DEFAULT_LIMIT = 10;
 
 const taskIdSchema = v.pipe(v.string(), v.uuid("Expected a UUID"));
 
@@ -32,8 +30,16 @@ const insertTaskSchema = v.object({
 
 const updateTaskSchema = v.object(taskFieldsSchema);
 
+const pageSchema = v.pipe(
+  v.string(),
+  v.regex(/^\d+$/, "Expected a non-negative integer"),
+  v.transform(Number),
+  v.integer(),
+  v.minValue(0),
+);
+
 const selectTasksSchema = v.object({
-  page: v.optional(v.number()),
+  page: v.optional(pageSchema),
   status: taskStatusSchema,
 });
 
@@ -139,13 +145,19 @@ export const tasksRoute = factory
     const session = context.get("authorizedSession");
     const query = context.req.valid("query");
     const db = context.get("db");
+    const page = query.page ?? 0;
 
     const rows = await db
       .select()
       .from(schema.task)
       .where(and(eq(schema.task.status, query.status), eq(schema.task.userId, session.userId)))
-      .limit(SELECT_TASKS_DEFAULT_LIMIT)
-      .offset(SELECT_TASKS_DEFAULT_LIMIT * (query.page ?? 0));
+      // One extra row tells the client whether another page exists without a
+      // second count query.
+      .limit(TASKS_PAGE_SIZE + 1)
+      .offset(TASKS_PAGE_SIZE * page);
 
-    return context.json(rows.map(toTaskDto));
+    return context.json({
+      hasNext: rows.length > TASKS_PAGE_SIZE,
+      items: rows.slice(0, TASKS_PAGE_SIZE).map(toTaskDto),
+    });
   });

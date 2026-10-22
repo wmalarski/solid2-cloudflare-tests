@@ -2,6 +2,7 @@ import {
   createContext,
   createOptimisticStore,
   createSignal,
+  refresh,
   useContext,
   type Component,
   type ParentProps,
@@ -11,21 +12,67 @@ import { useHonoClientContext } from "~/integrations/hono-client/hono-client-con
 import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED } from "../constansts";
 import { parseResponse } from "hono/client";
 import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
+import type { TaskDto, TasksPageDto } from "../task-dto";
 
 const createSelectTasksResource = (status: TaskStatus) => {
   const honoClient = useHonoClientContext();
 
-  const [page, setPage] = createSignal(0);
+  // Number of server pages loaded into the column. "Load more" adds one.
+  const [loadedPages, setLoadedPages] = createSignal(1);
 
-  const [resource, setResource] = createOptimisticStore(
-    () => parseResponse(honoClient.api.tasks.$get({ query: { status } })),
-    [],
+  // Page responses are cached while the column grows, so loading another page
+  // only requests that page instead of the whole column again. A reload clears
+  // the cache because a server write may have moved items between pages.
+  const pageCache = new Map<number, Promise<TasksPageDto>>();
+
+  const fetchPage = (page: number) => {
+    const cached = pageCache.get(page);
+    if (cached) {
+      return cached;
+    }
+
+    const request = parseResponse(
+      honoClient.api.tasks.$get({ query: { page: String(page), status } }),
+    ).catch((error: unknown) => {
+      pageCache.delete(page);
+      throw error;
+    });
+
+    pageCache.set(page, request);
+
+    return request;
+  };
+
+  const loadPages = async (pages: number): Promise<TasksPageDto> => {
+    const results = await Promise.all(Array.from({ length: pages }, (_, page) => fetchPage(page)));
+    const lastPage = results.at(-1);
+
+    return {
+      hasNext: lastPage?.hasNext ?? false,
+      items: results.flatMap((result) => result.items),
+    };
+  };
+
+  const [resource, setResource] = createOptimisticStore<TasksPageDto>(
+    () => loadPages(loadedPages()),
+    { hasNext: false, items: [] },
   );
 
-  return { resource, page, setPage, setResource };
+  const loadMore = () => {
+    setLoadedPages((current) => current + 1);
+  };
+
+  const reload = () => {
+    pageCache.clear();
+    return refresh(resource);
+  };
+
+  return { loadMore, reload, resource, setResource };
 };
 
-export type TaskResourceItem = ReturnType<typeof createSelectTasksResource>["resource"][number];
+export type TaskResourceItem = TaskDto;
+
+export type TasksColumnResource = ReturnType<typeof createSelectTasksResource>;
 
 const createTasksContext = () => {
   const columns = {
@@ -61,7 +108,7 @@ const createTasksContext = () => {
     };
 
     columns[args.status].setResource((resource) => {
-      resource.push(item);
+      resource.items.push(item);
     });
 
     return item;
@@ -69,9 +116,9 @@ const createTasksContext = () => {
 
   const deleteTask = (status: TaskStatus, taskId: string) => {
     columns[status].setResource((resource) => {
-      const indexToDelete = resource.findIndex((element) => element.id === taskId);
+      const indexToDelete = resource.items.findIndex((element) => element.id === taskId);
       if (indexToDelete !== -1) {
-        resource.splice(indexToDelete, 1);
+        resource.items.splice(indexToDelete, 1);
       }
     });
   };
@@ -89,7 +136,7 @@ const createTasksContext = () => {
 
     if (sameStatus) {
       columns[status].setResource((resource) => {
-        const element = resource.find((element) => element.id === taskId);
+        const element = resource.items.find((element) => element.id === taskId);
         if (element) {
           element.note = args.note;
           element.rate = args.rate ?? null;
@@ -98,7 +145,7 @@ const createTasksContext = () => {
       return;
     }
 
-    const taskToRemove = columns[status].resource.find((element) => element.id === taskId);
+    const taskToRemove = columns[status].resource.items.find((element) => element.id === taskId);
     if (!taskToRemove) {
       return;
     }
@@ -106,7 +153,7 @@ const createTasksContext = () => {
     deleteTask(status, taskId);
 
     columns[args.status].setResource((resource) => {
-      resource.splice(0, 0, {
+      resource.items.splice(0, 0, {
         ...taskToRemove,
         note: args.note,
         rate: args.rate ?? null,

@@ -10,10 +10,12 @@ const DATABASE_NAME = "albums";
 /**
  * Fallback owner for the seeded tasks. The `task.user_id` column is NOT NULL and
  * references `user.id`, so every row needs a user that already exists in D1.
- * This is the user present in `src/scripts/dump-remote.sql`; override it with
+ * This is the owner of the remote `albums` database. Do not use the user from
+ * `src/scripts/dump-remote.sql`: it only exists in the legacy database, and
+ * seeding with it fails with `FOREIGN KEY constraint failed`. Override it with
  * `SEED_USER_ID=<id> node src/scripts/transforming.ts` if needed.
  */
-const DEFAULT_USER_ID = "Q7jE1mMta1h79E89L6VxoJq6vuEq3PgD";
+const DEFAULT_USER_ID = "uoxP9ZX1HMidJKnVu0Y068FCsSUfZz2e";
 
 type Task = {
   doneAt?: number;

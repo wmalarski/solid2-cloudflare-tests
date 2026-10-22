@@ -4,4 +4,6 @@ export const STATUS_REVIEWED = "reviewed";
 
 export const BOOKMARK_STATUSES = [STATUS_NEW, STATUS_IN_PROGRESS, STATUS_REVIEWED] as const;
 
+export const TASKS_PAGE_SIZE = 10;
+
 export const FINISHED_BOOKMARK_STATUSES_SET = new Set<string>([STATUS_REVIEWED]);

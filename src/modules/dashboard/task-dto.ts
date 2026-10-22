@@ -35,3 +35,13 @@ export const toTaskDto = (row: TaskRow): TaskDto => ({
   updatedAt: row.updatedAt?.toISOString() ?? null,
   url: row.url,
 });
+
+/**
+ * One page of a board column. The client needs `hasNext` up front so the
+ * column can disable its "next page" control without probing for an empty
+ * page first.
+ */
+export type TasksPageDto = {
+  hasNext: boolean;
+  items: TaskDto[];
+};

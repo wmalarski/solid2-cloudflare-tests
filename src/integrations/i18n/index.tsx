@@ -53,6 +53,7 @@ const enDict = {
     confirm: "Are you sure you want to proceed?",
     delete: "Delete",
     edit: "Edit",
+    loadMore: "Load more",
     openMenu: "Open Menu",
     save: "Save",
     update: "Update",

@@ -1,15 +1,21 @@
 import {
   action,
+  createMemo,
   createSignal,
   createUniqueId,
   For,
+  isPending,
   Loading,
-  refresh,
   Repeat,
+  Show,
   type Component,
 } from "solid-js";
 import type { TaskStatus } from "./validation";
-import { useTasksContext, type TaskResourceItem } from "./data-contexts/tasks-context";
+import {
+  useTasksContext,
+  type TaskResourceItem,
+  type TasksColumnResource,
+} from "./data-contexts/tasks-context";
 import { BOOKMARK_STATUSES } from "./constansts";
 import { Card, CardActions, CardBody, CardDescription, CardTitle } from "~/ui/card/card";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
@@ -61,15 +67,47 @@ const TasksColumn: Component<TasksColumnProps> = (props) => {
 
   const statusTranslations = useStatusTranslations();
 
+  const tasksColumn = () => tasksContext.columns[props.status];
+
+  const headingId = createUniqueId();
+
   return (
     <div class="flex flex-col gap-4 not-last:border-r-2 border-base-300 p-4">
-      <h2 class="text-md uppercase text-center">{statusTranslations(props.status)}</h2>
-      <ul class="flex flex-row flex-wrap gap-4">
-        <Loading fallback={<SkeletonFragment />}>
-          <TaskColumnFragment tasks={tasksContext.columns[props.status].resource} />
-        </Loading>
-      </ul>
+      <h2 id={headingId} class="text-md uppercase text-center">
+        {statusTranslations(props.status)}
+      </h2>
+      <Loading fallback={<SkeletonFragment />}>
+        <TaskColumnFragment tasks={tasksColumn().resource.items} />
+        <ColumnLoadMore column={tasksColumn()} labelledBy={headingId} />
+      </Loading>
     </div>
+  );
+};
+
+type ColumnLoadMoreProps = {
+  column: TasksColumnResource;
+  labelledBy: string;
+};
+
+const ColumnLoadMore: Component<ColumnLoadMoreProps> = (props) => {
+  const { t } = useI18n();
+
+  const isLoading = createMemo(() => isPending(() => props.column.resource.items));
+
+  return (
+    <Show when={props.column.resource.hasNext}>
+      <div class="flex justify-center" role="group" aria-labelledby={props.labelledBy}>
+        <Button
+          disabled={isLoading()}
+          isLoading={isLoading()}
+          onClick={props.column.loadMore}
+          size="sm"
+          variant="outline"
+        >
+          {t("common.loadMore")}
+        </Button>
+      </div>
+    </Show>
   );
 };
 
@@ -79,9 +117,11 @@ type TaskColumnFragmentProps = {
 
 const TaskColumnFragment: Component<TaskColumnFragmentProps> = (props) => {
   return (
-    <For each={props.tasks} keyed={(task) => task.id}>
-      {(task) => <TaskColumnItem task={task()} />}
-    </For>
+    <ul class="flex flex-row flex-wrap gap-4">
+      <For each={props.tasks} keyed={(task) => task.id}>
+        {(task) => <TaskColumnItem task={task()} />}
+      </For>
+    </ul>
   );
 };
 
@@ -153,8 +193,7 @@ const DeleteTaskDialog: Component<DeleteTaskDialogProps> = (props) => {
     );
 
     const tasksColumn = tasksContext.columns[status];
-    yield refresh(tasksColumn.resource);
-    tasksColumn.setPage(0);
+    yield tasksColumn.reload();
   });
 
   return (
@@ -250,14 +289,10 @@ const UpdateTaskForm: Component<UpdateTaskFormProps> = (props) => {
       }),
     );
 
-    const tasksColumn = tasksContext.columns[status];
-    yield refresh(tasksColumn.resource);
-    tasksColumn.setPage(0);
+    yield tasksContext.columns[status].reload();
 
     if (status !== parsed.output.status) {
-      const tasksColumn = tasksContext.columns[parsed.output.status];
-      yield refresh(tasksColumn.resource);
-      tasksColumn.setPage(0);
+      yield tasksContext.columns[parsed.output.status].reload();
     }
   });
 
@@ -269,7 +304,11 @@ const UpdateTaskForm: Component<UpdateTaskFormProps> = (props) => {
 };
 
 const SkeletonFragment: Component = () => {
-  return <Repeat count={4}>{() => <SkeletonItem />}</Repeat>;
+  return (
+    <ul class="flex flex-row flex-wrap gap-4">
+      <Repeat count={4}>{() => <SkeletonItem />}</Repeat>
+    </ul>
+  );
 };
 
 const SkeletonItem: Component = () => {

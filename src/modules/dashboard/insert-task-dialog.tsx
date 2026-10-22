@@ -1,5 +1,5 @@
 import type { ComponentProps } from "@solidjs/web";
-import { action, createSignal, createUniqueId, refresh, type Component } from "solid-js";
+import { action, createSignal, createUniqueId, type Component } from "solid-js";
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
 import { TaskFields, taskFieldsSchema } from "./task-fields";
 import { parseFormValidationError, transformFormData, type FormIssues } from "~/ui/utils/forms";
@@ -96,9 +96,7 @@ const InsertTaskForm: Component<InsertTaskFormProps> = (props) => {
     );
 
     const status = parsed.output.status;
-    const tasksColumn = tasksContext.columns[status];
-    yield refresh(tasksColumn.resource);
-    tasksColumn.setPage(0);
+    yield tasksContext.columns[status].reload();
   });
 
   return (

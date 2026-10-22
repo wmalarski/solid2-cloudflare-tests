@@ -87,7 +87,7 @@ describe("task actions", () => {
 
     renderBoard();
 
-    await page.getByRole("button", { name: "Update" }).click();
+    await page.getByRole("button", { name: "Update" }).first().click();
 
     const dialog = openDialog();
     await dialog.getByLabelText("Note").fill("Best song");
@@ -110,7 +110,7 @@ describe("task actions", () => {
 
     renderBoard();
 
-    await page.getByRole("button", { name: "Update" }).click();
+    await page.getByRole("button", { name: "Update" }).first().click();
 
     const dialog = openDialog();
     await dialog.getByLabelText("Status").selectOptions(STATUS_REVIEWED);
@@ -129,7 +129,7 @@ describe("task actions", () => {
 
     await expect.poll(() => cardWithTitle("Kid A"), poll).not.toBeNull();
 
-    await page.getByRole("button", { name: "Delete" }).click();
+    await page.getByRole("button", { name: "Delete" }).first().click();
     await openDialog().getByRole("button", { name: "Delete" }).click();
 
     await expect.poll(() => cardWithTitle("Kid A"), poll).toBeNull();
@@ -142,7 +142,7 @@ describe("task actions", () => {
 
     renderBoard();
 
-    await page.getByRole("button", { name: "Delete" }).click();
+    await page.getByRole("button", { name: "Delete" }).first().click();
     await expect.poll(() => document.querySelector("dialog[open]"), poll).not.toBeNull();
 
     // The alert dialog offers two "Close" buttons (action + backdrop).

@@ -1,6 +1,6 @@
 import { HttpResponse, http } from "msw/http";
 import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
-import { STATUS_REVIEWED } from "~/modules/dashboard/constansts";
+import { STATUS_REVIEWED, TASKS_PAGE_SIZE } from "~/modules/dashboard/constansts";
 import type { TaskStatus } from "~/modules/dashboard/validation";
 import { getMockDb } from "~/testing/msw/db";
 import {
@@ -10,9 +10,6 @@ import {
   createTaskFromAlbum,
   type MockTask,
 } from "./fixtures";
-
-/** Mirrors `SELECT_TASKS_DEFAULT_LIMIT` without importing the Worker route. */
-const TASKS_PAGE_SIZE = 10;
 
 const now = () => new Date().toISOString();
 
@@ -52,7 +49,10 @@ const getTasks = () =>
     const tasks = getMockDb().tasks.filter((task) => !status || task.status === status);
     const start = page * TASKS_PAGE_SIZE;
 
-    return HttpResponse.json(tasks.slice(start, start + TASKS_PAGE_SIZE));
+    return HttpResponse.json({
+      hasNext: start + TASKS_PAGE_SIZE < tasks.length,
+      items: tasks.slice(start, start + TASKS_PAGE_SIZE),
+    });
   });
 
 const insertTask = () =>
