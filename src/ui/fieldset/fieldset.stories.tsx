@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
+import { FieldRoot } from "../field/field";
 import { Input } from "../input/input";
 import { Fieldset, FieldsetLabel, FieldsetLegend } from "./fieldset";
 
@@ -22,6 +23,22 @@ export const Default: Story = {
       <Input placeholder="you@example.com" type="email" width="full" />
       <FieldsetLabel>Password</FieldsetLabel>
       <Input placeholder="••••••••" type="password" width="full" />
+    </Fieldset>
+  ),
+};
+
+export const WithFieldRoot: Story = {
+  render: (args) => (
+    <Fieldset {...args}>
+      <FieldsetLegend>Account details</FieldsetLegend>
+      <FieldRoot name="email">
+        <FieldsetLabel>Email</FieldsetLabel>
+        <Input placeholder="you@example.com" type="email" width="full" />
+      </FieldRoot>
+      <FieldRoot name="password">
+        <FieldsetLabel>Password</FieldsetLabel>
+        <Input placeholder="••••••••" type="password" width="full" />
+      </FieldRoot>
     </Fieldset>
   ),
 };

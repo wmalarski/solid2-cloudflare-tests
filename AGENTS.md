@@ -99,3 +99,87 @@ Also:
   in the repository.
 
 <!-- END solid-2.0-primer -->
+
+## Hono CLI
+
+Run `npx hono --help` first, and use the CLI instead of a dev server.
+
+## Solid context conventions
+
+Context is for state scoped to a subtree. Build it with a `create*` factory so
+the reactive value is created once per provider and its type is derived from the
+factory.
+
+### Canonical shape
+
+```tsx
+type CreateThingContextArgs = {
+  id?: string;
+};
+
+const createThingContext = (args: Accessor<CreateThingContextArgs>) => {
+  const id = createMemo(() => args().id);
+
+  return {
+    get id() {
+      return id();
+    },
+  };
+};
+
+type ThingContextValue = ReturnType<typeof createThingContext>;
+
+const ThingContext = createContext<ThingContextValue | null>(null);
+
+export const useThingContext = () => {
+  const value = useContext(ThingContext);
+
+  if (!value) {
+    throw new Error("ThingContext not defined");
+  }
+
+  return value;
+};
+
+type ThingContextProviderProps = ParentProps<{
+  id?: string;
+}>;
+
+export const ThingContextProvider: Component<ThingContextProviderProps> = (props) => {
+  const value = createThingContext(() => props);
+
+  return <ThingContext value={value}>{props.children}</ThingContext>;
+};
+```
+
+### Rules
+
+- Define the factory outside the component and call it inside the provider that
+  owns the state. Never create a reactive provider value at module scope.
+- Derive the value type with `ReturnType<typeof createThingContext>`.
+- Pass reactive props as an accessor (`() => props`) and read them inside
+  `createMemo`, `createSignal`, or JSX. Do not snapshot props in the factory
+  body.
+- Return accessors/signals from the factory, or an object of getters backed by
+  memos when consumers should read plain values. `src/ui/field/field.tsx` uses
+  the getter form.
+- Render `<ThingContext value={value}>`, never `<ThingContext.Provider>`.
+- Export the `useThingContext` hook rather than the raw context unless
+  low-level composition needs it.
+- Name hooks `useThingContext` and providers `ThingContextProvider`. Compound
+  component roots may use a domain name such as `FieldRoot`.
+- A `null` context default plus a throwing hook is the default for required
+  context. Return `null` from the hook only when the context is deliberately
+  optional; call sites must then use optional access (`field?.id`) as
+  `FieldsetLabel` and the input components do.
+- Use `createContext(defaultValue)` only for a static/global service with a
+  meaningful fallback (see `HonoClientContext`), not for reactive state.
+- A provider may accept a pre-built `value` when the app owns its lifecycle
+  (see `AuthContextProvider`).
+- Use `createUniqueId()` for ids that must match during SSR/hydration; do not
+  use `crypto.randomUUID()` for UI ids.
+
+Existing examples: `src/integrations/i18n/index.tsx`,
+`src/integrations/better-auth/auth-context.tsx`,
+`src/modules/dashboard/data-contexts/tasks-context.tsx`, and
+`src/ui/field/field.tsx`.

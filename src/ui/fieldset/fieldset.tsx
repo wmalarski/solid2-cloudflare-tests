@@ -1,4 +1,5 @@
-import type { Component } from "solid-js";
+import { type Component, omit } from "solid-js";
+import { useFieldContext } from "../field/field";
 import type { ComponentVariantProps } from "../utils/types";
 import { fieldsetLabelRecipe, fieldsetLegendRecipe, fieldsetRecipe } from "./fieldset.recipe";
 
@@ -11,9 +12,16 @@ export const Fieldset: Component<FieldsetProps> = (props) => {
 type FieldsetLabelProps = ComponentVariantProps<"label", typeof fieldsetLabelRecipe>;
 
 export const FieldsetLabel: Component<FieldsetLabelProps> = (props) => {
+  const field = useFieldContext();
+  const withoutFieldProps = omit(props, "for");
+
   return (
     // oxlint-disable-next-line label-has-associated-control
-    <label {...props} class={fieldsetLabelRecipe({ class: props.class })} />
+    <label
+      {...withoutFieldProps}
+      for={props.for ?? field?.id}
+      class={fieldsetLabelRecipe({ class: props.class })}
+    />
   );
 };
 

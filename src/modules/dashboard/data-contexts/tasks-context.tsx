@@ -70,7 +70,9 @@ const createTasksContext = () => {
   const deleteTask = (status: TaskStatus, taskId: string) => {
     columns[status].setResource((resource) => {
       const indexToDelete = resource.findIndex((element) => element.id === taskId);
-      resource.splice(indexToDelete, 1);
+      if (indexToDelete !== -1) {
+        resource.splice(indexToDelete, 1);
+      }
     });
   };
 
