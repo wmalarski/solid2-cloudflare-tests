@@ -2,8 +2,6 @@ import type { Image } from "@spotify/web-api-ts-sdk";
 import { createMemo, Show, type Component } from "solid-js";
 import { useI18n } from "~/integrations/i18n";
 import { CardDescription, CardTitle } from "~/ui/card/card";
-import { createArtistsNamesFormatter } from "~/integrations/spotify/formatters";
-import { createDateFormatter } from "~/integrations/i18n/create-date-formatter";
 import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
 import { InfoRowContainer, InfoRowItem } from "~/ui/info-row/info-row";
 
@@ -41,21 +39,18 @@ type AlbumInformationSectionProps = {
 };
 
 export const AlbumInformationSection: Component<AlbumInformationSectionProps> = (props) => {
-  const { t } = useI18n();
-
-  const artistsNamesFormatter = createArtistsNamesFormatter();
-  const dateFormatter = createDateFormatter();
+  const { t, formatters } = useI18n();
 
   return (
     <div class="flex flex-col gap-2">
       <CardTitle class="truncate" component="span">
         {props.album.name}
       </CardTitle>
-      <CardDescription>{artistsNamesFormatter(props.album.artists)}</CardDescription>
+      <CardDescription>{formatters.artistsNames(props.album.artists)}</CardDescription>
       <InfoRowContainer>
         <InfoRowItem
           name={t("task.releaseDate")}
-          value={props.album.release_date ? dateFormatter(props.album.release_date) : undefined}
+          value={props.album.release_date ? formatters.date(props.album.release_date) : undefined}
         />
       </InfoRowContainer>
     </div>

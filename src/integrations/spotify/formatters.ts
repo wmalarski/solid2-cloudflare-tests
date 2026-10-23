@@ -1,10 +1,8 @@
 import type { SimplifiedArtist } from "@spotify/web-api-ts-sdk";
-import { useI18n } from "../i18n";
-import { createMemo } from "solid-js";
+import { type Accessor, createMemo } from "solid-js";
+import type { Locale } from "../i18n";
 
-export const createArtistsNamesFormatter = () => {
-  const { locale } = useI18n();
-
+export const createArtistsNamesFormatter = (locale: Accessor<Locale>) => {
   const formatter = createMemo(
     () =>
       new Intl.ListFormat(locale(), {

@@ -8,6 +8,8 @@ import {
   type ParentProps,
   useContext,
 } from "solid-js";
+import { createArtistsNamesFormatter } from "../spotify/formatters";
+import { createDateFormatter } from "./create-date-formatter";
 
 const enDict = {
   auth: {
@@ -89,7 +91,12 @@ export const createI18nValue = () => {
     return translate()(path, ...args);
   };
 
-  return { locale, setLocale, t };
+  const formatters = {
+    date: createDateFormatter(locale),
+    artistsNames: createArtistsNamesFormatter(locale),
+  };
+
+  return { formatters, locale, setLocale, t };
 };
 
 type I18nContextValue = ReturnType<typeof createI18nValue>;

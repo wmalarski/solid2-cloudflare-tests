@@ -1,9 +1,7 @@
-import { createMemo } from "solid-js";
-import { useI18n } from "./index";
+import { type Accessor, createMemo } from "solid-js";
+import type { Locale } from "./index";
 
-export const createDateFormatter = () => {
-  const { locale } = useI18n();
-
+export const createDateFormatter = (locale: Accessor<Locale>) => {
   const formatter = createMemo(
     () => new Intl.DateTimeFormat(locale(), { dateStyle: "medium", hour12: false }),
   );

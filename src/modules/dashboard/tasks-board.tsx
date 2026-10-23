@@ -36,14 +36,14 @@ import { parseResponse } from "hono/client";
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
 import { AlbumImage } from "./album-card-fragments";
 import { parseImages, parseSimplifiedArtist } from "./parsers";
-import { createArtistsNamesFormatter } from "~/integrations/spotify/formatters";
+
 import * as v from "valibot";
 import { TaskFields, taskFieldsSchema } from "./task-fields";
 import { parseFormValidationError, transformFormData, type FormIssues } from "~/ui/utils/forms";
 import type { ComponentProps } from "@solidjs/web";
 import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { Button } from "~/ui/button/button";
-import { createDateFormatter } from "~/integrations/i18n/create-date-formatter";
+
 import { useStatusTranslations } from "./use-status-translations";
 import { InfoRowContainer, InfoRowItem } from "~/ui/info-row/info-row";
 import { TaskDetailsDialog } from "./details-dialog";
@@ -130,10 +130,7 @@ type TaskColumnItemProps = {
 };
 
 const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
-  const { t } = useI18n();
-
-  const artistsNamesFormatter = createArtistsNamesFormatter();
-  const dateFormatter = createDateFormatter();
+  const { t, formatters } = useI18n();
 
   return (
     <li class="min-w-xl w-full">
@@ -142,12 +139,12 @@ const TaskColumnItem: Component<TaskColumnItemProps> = (props) => {
         <CardBody>
           <CardTitle component="span">{props.task.title}</CardTitle>
           <CardDescription>
-            {artistsNamesFormatter(parseSimplifiedArtist(props.task.spotifyArtists))}
+            {formatters.artistsNames(parseSimplifiedArtist(props.task.spotifyArtists))}
           </CardDescription>
           <InfoRowContainer class="pb-5">
             <InfoRowItem
               name={t("task.releaseDate")}
-              value={props.task.releaseDate ? dateFormatter(props.task.releaseDate) : undefined}
+              value={props.task.releaseDate ? formatters.date(props.task.releaseDate) : undefined}
             />
             <InfoRowItem name={t("task.note")} value={props.task.note ?? undefined} />
             <InfoRowItem

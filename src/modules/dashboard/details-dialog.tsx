@@ -24,9 +24,9 @@ import { useI18n } from "~/integrations/i18n";
 import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
 import { parseImages, parseSimplifiedArtist } from "./parsers";
 import { AlbumImage, AlbumInformationSection } from "./album-card-fragments";
-import { createArtistsNamesFormatter } from "~/integrations/spotify/formatters";
+
 import { InfoRowContainer, InfoRowItem } from "~/ui/info-row/info-row";
-import { createDateFormatter } from "~/integrations/i18n/create-date-formatter";
+
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
 import { parseResponse } from "hono/client";
 import { Card, CardActions, CardBody } from "~/ui/card/card";
@@ -76,12 +76,9 @@ type DetailsDialogProps = {
 };
 
 const DetailsDialog: Component<DetailsDialogProps> = (props) => {
-  const { t } = useI18n();
+  const { t, formatters } = useI18n();
 
   const dialogId = createUniqueId();
-
-  const artistsNamesFormatter = createArtistsNamesFormatter();
-  const dateFormatter = createDateFormatter();
 
   const [open, setOpen] = createSignal(false);
 
@@ -103,11 +100,11 @@ const DetailsDialog: Component<DetailsDialogProps> = (props) => {
         <DialogBox>
           <AlbumImage images={props.images} size={640} />
           <DialogTitle class="pt-4">{props.name}</DialogTitle>
-          <DialogDescription>{artistsNamesFormatter(props.artists)}</DialogDescription>
+          <DialogDescription>{formatters.artistsNames(props.artists)}</DialogDescription>
           <InfoRowContainer>
             <InfoRowItem
               name={t("task.releaseDate")}
-              value={props.relaseDate ? dateFormatter(props.relaseDate) : undefined}
+              value={props.relaseDate ? formatters.date(props.relaseDate) : undefined}
             />
           </InfoRowContainer>
           <Show when={open()}>
