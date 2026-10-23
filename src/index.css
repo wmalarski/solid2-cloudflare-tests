@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* Only browser-rendered markup needs scanning. Documentation, vendored skills,
+   Node scripts and Worker code are not application markup, and prose such as
+   `card-side`, `loading="lazy"`, `join` or `isolate` otherwise generates unused
+   CSS. */
+@source not "../.agents";
+@source not "../PERF.md";
+@source not "../scripts";
+@source not "../src/worker";
+
 @plugin "daisyui" {
   themes:
     corporate --default,

@@ -14,13 +14,13 @@ export default defineConfig(({ command, mode }) => {
       "*": "vp check --fix",
     },
     fmt: {
-      ignorePatterns: ["worker-configuration.d.ts"],
+      ignorePatterns: ["worker-configuration.d.ts", ".agents/**"],
     },
     lint: {
       jsPlugins: [{ name: "vite-plus", specifier: "vite-plus/oxlint-plugin" }],
       rules: { "vite-plus/prefer-vite-plus-imports": "error" },
       options: { typeAware: true, typeCheck: true },
-      ignorePatterns: ["worker-configuration.d.ts"],
+      ignorePatterns: ["worker-configuration.d.ts", ".agents/**"],
     },
     plugins: [
       solid(),

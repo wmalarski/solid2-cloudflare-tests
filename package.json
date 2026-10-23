@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "analyze": "vp build --mode analyze",
-    "build": "tsc -b && vp build",
+    "analyze": "vp build --mode analyze && node scripts/check-bundle-budget.mjs",
+    "build": "tsc -b && vp build && node scripts/check-bundle-budget.mjs",
+    "budget": "node scripts/check-bundle-budget.mjs",
     "build-storybook": "storybook build",
     "cf-typegen": "wrangler types",
     "dev": "vp dev",
@@ -38,7 +39,8 @@
     "tailwind-merge": "3.7.0",
     "tailwind-variants": "^3.3.1",
     "tailwindcss": "^4.3.3",
-    "valibot": "^1.5.0"
+    "valibot": "^1.5.0",
+    "web-vitals": "^6.2.3"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.64.0",

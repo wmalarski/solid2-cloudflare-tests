@@ -12,3 +12,11 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 }
 
 render(() => <App />, root!);
+
+// Field data is always on in production; `?vitals` turns it on for a local
+// build so the payload can be inspected. Loaded lazily to stay off the LCP path.
+if (import.meta.env.PROD || new URLSearchParams(location.search).has("vitals")) {
+  void import("./modules/performance/report-web-vitals.ts").then(({ reportWebVitals }) =>
+    reportWebVitals(),
+  );
+}

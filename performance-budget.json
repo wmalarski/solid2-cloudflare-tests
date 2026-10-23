@@ -1,0 +1,24 @@
+{
+  "$comment": [
+    "Performance budgets enforced by `pnpm budget` (scripts/check-bundle-budget.mjs)",
+    "and evaluated against field data by src/performance/budget.ts.",
+    "Sizes are gzip level 9, measured in kB (1000 bytes) to match Vite.",
+    "Raise a budget deliberately, in the change that adds the weight."
+  ],
+  "client": {
+    "javascriptKb": 90,
+    "cssKb": 25,
+    "largestChunkKb": 90
+  },
+  "worker": {
+    "entryKb": 280,
+    "javascriptKb": 450
+  },
+  "webVitals": {
+    "LCP": [2500, 4000],
+    "CLS": [0.1, 0.25],
+    "INP": [200, 500],
+    "TTFB": [800, 1800],
+    "FCP": [1800, 3000]
+  }
+}

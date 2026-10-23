@@ -10,11 +10,13 @@ import { SpotifyError, onSpotifyError } from "~/integrations/spotify/errors";
 import { onEnvValidationError, EnvValidationError } from "./env/errors";
 import { onErrorFallback } from "./errors";
 import { requestLogger } from "./request-logger";
+import { webVitalsRoute } from "../modules/performance/routes/web-vitals";
 
 const app = factory.createApp();
 
 const routes = app
   .use("*", requestLogger)
+  .route("/api/rum", webVitalsRoute)
   .use("/api/*", envMiddleware, dbMiddleware, authMiddleware)
   .all("/api/auth/*", async (context) => {
     const auth = context.get("auth");

@@ -25,6 +25,7 @@ const browser = () => ({
  * - `ui`: unit + screenshot tests for the `src/ui` component library.
  * - `integration`: tests for composed UI (`src/modules`, `src/integrations`)
  *   that talk to the Hono API through MSW.
+ * - `worker`: Node-environment tests for Worker routes and shared server code.
  * - `storybook`: Storybook story tests (see `pnpm test-storybook`).
  *
  * The Playwright Chromium browser must be installed once
@@ -63,6 +64,17 @@ export default defineConfig({
           include: ["src/modules/**/*.test.{ts,tsx}", "src/integrations/**/*.test.{ts,tsx}"],
           setupFiles: ["./src/testing/test-setup.ts"],
           browser: browser(),
+        },
+      },
+      {
+        extends: true,
+        resolve: {
+          alias: { "~": srcDir },
+        },
+        test: {
+          name: "worker",
+          include: ["src/worker/**/*.test.ts", "src/performance/**/*.test.ts"],
+          environment: "node",
         },
       },
       {
