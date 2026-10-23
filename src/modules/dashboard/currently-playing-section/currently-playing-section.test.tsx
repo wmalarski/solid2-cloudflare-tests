@@ -3,10 +3,10 @@ import { describe, expect, it } from "vite-plus/test";
 import { page } from "vite-plus/test/browser";
 import { expectScreenshot, renderWithProviders } from "~/testing";
 import { seedMockDb } from "~/testing/msw";
-import { CurrentlyPlayingContextProvider } from "./data-contexts/currently-playing-context";
-import { TasksContextProvider } from "./data-contexts/tasks-context";
+import { CurrentlyPlayingContextProvider } from "../data-contexts/currently-playing-context";
+import { TasksContextProvider } from "../data-contexts/tasks-context";
 import { CurrentlyPlayingSection } from "./currently-playing-section";
-import { createPlaybackState } from "./tests/fixtures";
+import { createPlaybackState } from "../tests/fixtures";
 
 /**
  * Integration coverage for the currently playing card: it renders whatever the

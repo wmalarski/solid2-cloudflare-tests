@@ -2,7 +2,7 @@ import type { Component } from "solid-js";
 import { TasksBoard } from "./tasks-board";
 import { TasksContextProvider } from "./data-contexts/tasks-context";
 import { CurrentlyPlayingContextProvider } from "./data-contexts/currently-playing-context";
-import { CurrentlyPlayingSection } from "./currently-playing-section";
+import { CurrentlyPlayingSection } from "./currently-playing-section/currently-playing-section";
 import { SignOutButton } from "../auth/sign-out-button";
 
 export const DashboardContainer: Component = () => {

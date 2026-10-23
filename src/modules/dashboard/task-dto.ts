@@ -1,5 +1,5 @@
 import type { task } from "~/integrations/drizzle/schema";
-import type { TaskStatus } from "./validation";
+import type { TaskStatus } from "./primitives/validation";
 
 type TaskRow = typeof task.$inferSelect;
 

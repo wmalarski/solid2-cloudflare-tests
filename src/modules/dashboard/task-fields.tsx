@@ -9,9 +9,9 @@ import { Input } from "~/ui/input/input";
 import { type FormIssues } from "~/ui/utils/forms";
 import type { SelectTasksItem } from "./routes/types";
 import { Select } from "~/ui/select/select";
-import { BOOKMARK_STATUSES, STATUS_IN_PROGRESS } from "./constansts";
-import { taskStatusSchema } from "./validation";
-import { useStatusTranslations } from "./use-status-translations";
+import { BOOKMARK_STATUSES, STATUS_IN_PROGRESS } from "./primitives/constansts";
+import { taskStatusSchema } from "./primitives/validation";
+import { useStatusTranslations } from "./primitives/use-status-translations";
 
 export const taskFieldsSchema = v.object({
   note: v.string(),

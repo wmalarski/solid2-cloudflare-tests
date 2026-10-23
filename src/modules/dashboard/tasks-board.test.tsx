@@ -4,12 +4,17 @@ import { page } from "vite-plus/test/browser";
 import { expectScreenshot, renderWithProviders } from "~/testing";
 import { HttpResponse, http, seedMockDb, worker } from "~/testing/msw";
 import { getMockDb } from "~/testing/msw/db";
-import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED, TASKS_PAGE_SIZE } from "./constansts";
+import {
+  STATUS_IN_PROGRESS,
+  STATUS_NEW,
+  STATUS_REVIEWED,
+  TASKS_PAGE_SIZE,
+} from "./primitives/constansts";
 import { CurrentlyPlayingContextProvider } from "./data-contexts/currently-playing-context";
 import { TasksContextProvider } from "./data-contexts/tasks-context";
 import { TasksBoard } from "./tasks-board";
 import { createTask } from "./tests/fixtures";
-import type { TaskStatus } from "./validation";
+import type { TaskStatus } from "./primitives/validation";
 
 /** Per-test override of the default `/api/tasks` handler. */
 const getTasksOverride = () =>

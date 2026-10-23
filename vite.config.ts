@@ -22,7 +22,12 @@ export default defineConfig(({ command, mode }) => {
       options: { typeAware: true, typeCheck: true },
       ignorePatterns: ["worker-configuration.d.ts"],
     },
-    plugins: [solid(), tailwindcss(), cloudflare(), ...(analyze ? [Sonda() as any] : [])],
+    plugins: [
+      solid(),
+      tailwindcss(),
+      cloudflare(),
+      ...(analyze ? [Sonda({ open: false }) as any] : []),
+    ],
     build: {
       sourcemap: analyze,
       target: "esnext",

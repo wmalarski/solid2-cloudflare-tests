@@ -1,9 +1,9 @@
 import { createMemo, Show, type Component } from "solid-js";
-import { useCurrentlyPlayingContext } from "./data-contexts/currently-playing-context";
+import { useCurrentlyPlayingContext } from "../data-contexts/currently-playing-context";
 import { Card, CardActions, CardBody } from "~/ui/card/card";
-import { AlbumImage, AlbumInformationSection } from "./album-card-fragments";
+import { AlbumImage, AlbumInformationSection } from "../primitives/album-card-fragments";
 import { AlbumDetailsDialog } from "./details-dialog";
-import { InsertTaskDialog } from "./insert-task-dialog";
+import { InsertTaskDialog } from "../insert-task-dialog";
 
 export const CurrentlyPlayingSection: Component = () => {
   const currentlyPlayingContext = useCurrentlyPlayingContext();

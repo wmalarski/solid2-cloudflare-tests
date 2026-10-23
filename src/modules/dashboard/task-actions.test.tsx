@@ -3,10 +3,10 @@ import { describe, expect, it } from "vite-plus/test";
 import { page } from "vite-plus/test/browser";
 import { renderWithProviders } from "~/testing";
 import { seedMockDb } from "~/testing/msw";
-import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED } from "./constansts";
+import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED } from "./primitives/constansts";
 import { CurrentlyPlayingContextProvider } from "./data-contexts/currently-playing-context";
 import { TasksContextProvider } from "./data-contexts/tasks-context";
-import { CurrentlyPlayingSection } from "./currently-playing-section";
+import { CurrentlyPlayingSection } from "./currently-playing-section/currently-playing-section";
 import { TasksBoard } from "./tasks-board";
 import { createPlaybackState, createTask } from "./tests/fixtures";
 

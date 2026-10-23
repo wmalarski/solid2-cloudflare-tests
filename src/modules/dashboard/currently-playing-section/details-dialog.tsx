@@ -9,7 +9,7 @@ import {
   type Component,
 } from "solid-js";
 import type { Image, SimplifiedArtist } from "@spotify/web-api-ts-sdk";
-import { type TaskResourceItem } from "./data-contexts/tasks-context";
+import { type TaskResourceItem } from "../data-contexts/tasks-context";
 import {
   Dialog,
   DialogActions,
@@ -22,17 +22,17 @@ import {
 } from "~/ui/dialog/dialog";
 import { useI18n } from "~/integrations/i18n";
 import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
-import { parseImages, parseSimplifiedArtist } from "./parsers";
-import { AlbumImage, AlbumInformationSection } from "./album-card-fragments";
+import { parseImages, parseSimplifiedArtist } from "../primitives/parsers";
+import { AlbumImage, AlbumInformationSection } from "../primitives/album-card-fragments";
 
 import { InfoRowContainer, InfoRowItem } from "~/ui/info-row/info-row";
 
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
 import { parseResponse } from "hono/client";
 import { Card, CardActions, CardBody } from "~/ui/card/card";
-import { InsertTaskDialog } from "./insert-task-dialog";
+import { InsertTaskDialog } from "../insert-task-dialog";
 import { InfoIcon } from "~/ui/icons/info-icon";
-import { StartAlbumPlaybackButton } from "./start-playback-button";
+import { StartAlbumPlaybackButton } from "../primitives/start-playback-button";
 import { Skeleton } from "~/ui/skeleton/skeleton";
 
 type TaskDetailsDialogProps = {

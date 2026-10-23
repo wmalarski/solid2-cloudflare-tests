@@ -3,8 +3,8 @@ import { action, createMemo, isPending, refresh, Show, type Component } from "so
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
 import { useI18n } from "~/integrations/i18n";
 import { Button } from "~/ui/button/button";
-import { useCurrentlyPlayingContext } from "./data-contexts/currently-playing-context";
-import type { TaskResourceItem } from "./data-contexts/tasks-context";
+import { useCurrentlyPlayingContext } from "../data-contexts/currently-playing-context";
+import type { TaskResourceItem } from "../data-contexts/tasks-context";
 import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
 import { PlayIcon } from "~/ui/icons/play-icon";
 

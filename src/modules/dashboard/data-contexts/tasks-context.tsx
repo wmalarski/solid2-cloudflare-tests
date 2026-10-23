@@ -7,9 +7,9 @@ import {
   type Component,
   type ParentProps,
 } from "solid-js";
-import type { TaskStatus } from "../validation";
+import type { TaskStatus } from "../primitives/validation";
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
-import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED } from "../constansts";
+import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED } from "../primitives/constansts";
 import { parseResponse } from "hono/client";
 import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
 import type { TaskDto, TasksPageDto } from "../task-dto";

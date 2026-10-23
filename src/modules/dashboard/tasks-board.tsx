@@ -10,13 +10,13 @@ import {
   Show,
   type Component,
 } from "solid-js";
-import type { TaskStatus } from "./validation";
+import type { TaskStatus } from "./primitives/validation";
 import {
   useTasksContext,
   type TaskResourceItem,
   type TasksColumnResource,
 } from "./data-contexts/tasks-context";
-import { BOOKMARK_STATUSES } from "./constansts";
+import { BOOKMARK_STATUSES } from "./primitives/constansts";
 import { Card, CardActions, CardBody, CardDescription, CardTitle } from "~/ui/card/card";
 import { AlertDialog } from "~/ui/alert-dialog/alert-dialog";
 import { useI18n } from "~/integrations/i18n";
@@ -34,8 +34,8 @@ import {
 import { TrashIcon } from "~/ui/icons/trash-icon";
 import { parseResponse } from "hono/client";
 import { useHonoClientContext } from "~/integrations/hono-client/hono-client-context";
-import { AlbumImage } from "./album-card-fragments";
-import { parseImages, parseSimplifiedArtist } from "./parsers";
+import { AlbumImage } from "./primitives/album-card-fragments";
+import { parseImages, parseSimplifiedArtist } from "./primitives/parsers";
 
 import * as v from "valibot";
 import { TaskFields, taskFieldsSchema } from "./task-fields";
@@ -44,10 +44,10 @@ import type { ComponentProps } from "@solidjs/web";
 import { PencilIcon } from "~/ui/icons/pencil-icon";
 import { Button } from "~/ui/button/button";
 
-import { useStatusTranslations } from "./use-status-translations";
+import { useStatusTranslations } from "./primitives/use-status-translations";
 import { InfoRowContainer, InfoRowItem } from "~/ui/info-row/info-row";
-import { TaskDetailsDialog } from "./details-dialog";
-import { StartTaskPlaybackButton } from "./start-playback-button";
+import { TaskDetailsDialog } from "./currently-playing-section/details-dialog";
+import { StartTaskPlaybackButton } from "./primitives/start-playback-button";
 import { Skeleton } from "~/ui/skeleton/skeleton";
 
 export const TasksBoard: Component = () => {

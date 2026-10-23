@@ -8,9 +8,9 @@ import { getSpotifyAlbum } from "~/integrations/spotify/fetch";
 import { spotifyIdSchema } from "~/integrations/spotify/validation";
 import { schema } from "~/integrations/drizzle/schema";
 import { taskInsertRateLimit } from "./rate-limit";
-import { STATUS_REVIEWED, TASKS_PAGE_SIZE } from "../constansts";
+import { STATUS_REVIEWED, TASKS_PAGE_SIZE } from "../primitives/constansts";
 import { toTaskDto } from "../task-dto";
-import { taskStatusSchema } from "../validation";
+import { taskStatusSchema } from "../primitives/validation";
 
 const taskIdSchema = v.pipe(v.string(), v.uuid("Expected a UUID"));
 

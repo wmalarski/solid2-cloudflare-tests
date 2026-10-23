@@ -8,8 +8,8 @@ import type {
   SimplifiedTrack,
   Track,
 } from "@spotify/web-api-ts-sdk";
-import type { TaskStatus } from "~/modules/dashboard/validation";
-import { STATUS_NEW } from "~/modules/dashboard/constansts";
+import type { TaskStatus } from "~/modules/dashboard/primitives/validation";
+import { STATUS_NEW } from "~/modules/dashboard/primitives/constansts";
 
 /**
  * A `task` row as it crosses the wire. The Worker returns a DTO with ISO

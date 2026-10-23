@@ -1,7 +1,7 @@
 import { HttpResponse, http } from "msw/http";
 import type { SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
-import { STATUS_REVIEWED, TASKS_PAGE_SIZE } from "~/modules/dashboard/constansts";
-import type { TaskStatus } from "~/modules/dashboard/validation";
+import { STATUS_REVIEWED, TASKS_PAGE_SIZE } from "~/modules/dashboard/primitives/constansts";
+import type { TaskStatus } from "~/modules/dashboard/primitives/validation";
 import { getMockDb } from "~/testing/msw/db";
 import {
   createArtist,

@@ -1,5 +1,9 @@
 import type { PlaybackState, SimplifiedAlbum } from "@spotify/web-api-ts-sdk";
-import { STATUS_IN_PROGRESS, STATUS_NEW, STATUS_REVIEWED } from "~/modules/dashboard/constansts";
+import {
+  STATUS_IN_PROGRESS,
+  STATUS_NEW,
+  STATUS_REVIEWED,
+} from "~/modules/dashboard/primitives/constansts";
 import {
   createImages,
   createSimplifiedAlbum,
