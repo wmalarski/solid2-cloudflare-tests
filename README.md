@@ -23,6 +23,15 @@ It correctly bundles Solid in production mode and optimizes the build for the be
 The build is minified and the filenames include the hashes.<br>
 Your app is ready to be deployed!
 
+### `vp run analyze`
+
+Builds the app with source maps enabled and runs the [Sonda](https://sonda.dev)
+bundle analyzer. Reports for the Worker and client builds are written to
+`.sonda/` (open the generated HTML file for the build you are inspecting).
+
+Sonda and source maps are enabled only for this command; `vp dev` and
+`vp run build` stay lean.
+
 ## Component Library (Storybook)
 
 The `src/ui` component library is documented with [Storybook](https://storybook.js.org)

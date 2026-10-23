@@ -100,6 +100,22 @@ Also:
 
 <!-- END solid-2.0-primer -->
 
+## Code validation loop
+
+Run all of these before reporting a change as complete:
+
+```bash
+vp check        # format, lint and type checks
+vp test         # Vitest projects
+vp run build    # typecheck + production build
+vp run analyze  # production build + Sonda bundle size report
+```
+
+`vp run analyze` is the only build that enables source maps and the Sonda
+plugin. It writes HTML reports for the Worker and client builds to `.sonda/`;
+open the client report and check that the change did not grow the client bundle
+unexpectedly. Mention any notable bundle size change in the final summary.
+
 ## Hono CLI
 
 Run `npx hono --help` first, and use the CLI instead of a dev server.
