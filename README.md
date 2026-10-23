@@ -130,18 +130,48 @@ worked example.
 
 Real-browser E2E tests live in `e2e/` and run with
 [Playwright Test](https://playwright.dev). Unlike the Vitest projects above,
-these hit the **actual dev server** — the Solid client, the Hono Worker and its
+these hit the **actual app** — the Solid client, the Hono Worker and its
 Cloudflare bindings (D1 via `wrangler.jsonc`) all run for real, with no MSW.
 
 ```bash
-pnpm test-e2e          # run the suite (boots `pnpm dev` for you)
+pnpm test-e2e          # build + preview the production app, then run
 pnpm test-e2e-ui       # interactive UI mode
 pnpm test-e2e --headed # watch it in a real browser window
 ```
 
-`playwright.config.ts` starts the dev server via its `webServer` block (and
-reuses one you already have running locally), so there is nothing to launch by
-hand. `e2e/sign-in.spec.ts` is a worked example.
+`playwright.config.ts` builds (`pnpm build`) and serves the production output
+with `pnpm preview` via its `webServer` block, so the suite exercises minified,
+hashed assets — the same thing that ships. It reuses a preview already running
+on port 4173, so repeat runs skip the build. `e2e/sign-in.spec.ts` is a worked
+example.
+
+For fast iteration, `E2E_TARGET=dev pnpm test-e2e` runs against `pnpm dev`
+instead. The dev server serves unbundled modules, so it is not representative for
+performance.
+
+#### Performance collection
+
+`e2e/fixtures.ts` exports a `test` that installs an in-page `PerformanceObserver`
+before the app boots (see `e2e/performance.ts`). Every test therefore gets LCP,
+CLS, FCP, TTFB, an INP proxy, long tasks/TBT and resource counts. At the end of
+the test the snapshot is:
+
+- attached to the Playwright report as `performance` (JSON),
+- appended to `test-results/performance.jsonl`,
+- printed as one `[perf] …` line.
+
+Two environment flags tune it:
+
+```bash
+PERF_THROTTLE=1 pnpm test-e2e   # Slow 4G + 4x CPU
+PERF_BUDGET=1 pnpm test-e2e     # assert the `lab` budgets in performance-budget.json
+```
+
+Both are calibrated against the production preview. A throttled run of the
+sign-in screen lands around LCP 2.3 s, CLS 0, TBT 50 ms. With
+`E2E_TARGET=dev` the numbers include unbundled dev modules, so `PERF_BUDGET`
+skips its assertions and prints a warning. Field data comes from the RUM setup
+(`POST /api/rum`).
 
 All browser-mode projects need a Playwright browser once:
 `pnpm exec playwright install chromium`.

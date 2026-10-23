@@ -1,7 +1,8 @@
 {
   "$comment": [
-    "Performance budgets enforced by `pnpm budget` (scripts/check-bundle-budget.mjs)",
-    "and evaluated against field data by src/performance/budget.ts.",
+    "Performance budgets enforced by `pnpm budget` (scripts/check-bundle-budget.mjs),",
+    "evaluated against field data by src/performance/budget.ts, and asserted in",
+    "Playwright E2E runs by e2e/fixtures.ts (the `lab` section).",
     "Sizes are gzip level 9, measured in kB (1000 bytes) to match Vite.",
     "Raise a budget deliberately, in the change that adds the weight."
   ],
@@ -20,5 +21,11 @@
     "INP": [200, 500],
     "TTFB": [800, 1800],
     "FCP": [1800, 3000]
+  },
+  "lab": {
+    "lcpMs": 3000,
+    "cls": 0.1,
+    "inpMs": 200,
+    "tbtMs": 200
   }
 }

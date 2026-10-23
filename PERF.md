@@ -240,8 +240,29 @@ validates the report (10 metrics per request, 64-character id) and
 `src/performance/budget.ts` turns `performance-budget.json` into the thresholds
 shared by the client and the Worker.
 
+### Lab data (Playwright)
+
+Every E2E test attaches a `performance` JSON to the Playwright report and appends
+it to `test-results/performance.jsonl` (LCP, CLS, FCP, TTFB, an INP proxy, long
+tasks/TBT, and resource counts). See `e2e/fixtures.ts` and the E2E section of the
+README.
+
+```bash
+pnpm test-e2e                   # build + preview, then collect one [perf] line per test
+PERF_THROTTLE=1 pnpm test-e2e   # Slow 4G + 4x CPU
+PERF_BUDGET=1 pnpm test-e2e     # assert the `lab` budgets
+```
+
+The suite runs against `pnpm preview` (the production build), so these numbers
+are representative of what ships. On the sign-in screen, throttled: LCP ~2.3 s,
+CLS 0, TBT ~50 ms, 4 requests. `E2E_TARGET=dev` switches to the dev server for
+fast iteration; its unbundled modules make throttled numbers meaningless, so
+`PERF_BUDGET` skips assertions in that mode. Field data comes from the RUM setup
+above.
+
 There is no CI configuration in this repository yet. When one is added, run
-`pnpm build && pnpm budget` (and optionally `pnpm test-e2e`) in it.
+`pnpm build && pnpm budget` (and optionally `pnpm test-e2e` with
+`PERF_BUDGET=1`) in it.
 
 ## What is already good
 
@@ -277,6 +298,7 @@ pnpm build
 pnpm analyze        # Sonda reports in .sonda/, then the byte budget
 pnpm budget         # byte budget only, against the last build
 pnpm test
+pnpm test-e2e       # production build + preview + Playwright
 ```
 
 The throttled benchmark used a local static server for `dist/client`, Playwright
